@@ -13,7 +13,6 @@ import { AnimatePresence, MotionConfig } from "motion/react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { SplashScreen } from "@capacitor/splash-screen";
-import Lenis from "lenis";
 
 export default function App() {
   useEffect(() => {
@@ -23,28 +22,6 @@ export default function App() {
       StatusBar.setBackgroundColor({ color: "#1D4ED8" }).catch(() => {});
       SplashScreen.hide().catch(() => {});
     }
-
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
-
-    let animationFrameId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      animationFrameId = requestAnimationFrame(raf);
-    }
-
-    animationFrameId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      lenis.destroy();
-    };
   }, []);
 
   return (

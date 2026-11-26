@@ -49,11 +49,11 @@ export function AdminAuthScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden px-4 py-8 sm:py-10 min-h-dvh w-full"
+      className="relative z-10 min-h-dvh w-full flex flex-col items-center justify-center px-4 py-8 sm:py-10 overflow-x-hidden"
     >
       <PremiumBackground />
 
-      <div className="relative z-10 min-h-full w-full flex flex-col items-center justify-center">
+      <div className="relative z-10 w-full flex flex-col items-center">
         {/* Login Card */}
         <motion.div
           initial={{ opacity: 0, y: 32, scale: 0.96 }}

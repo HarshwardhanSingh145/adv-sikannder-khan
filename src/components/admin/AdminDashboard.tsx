@@ -778,8 +778,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
         </motion.aside>
 
         {/* Content Pane */}
-        <main className="flex-1 min-h-0 min-w-0 bg-[#FFFFFF]/90">
-          <SimpleBar className="h-full p-4 pb-24 md:p-6 md:pb-6 space-y-6 scroll-smooth">
+        <main className="flex-1 min-h-0 min-w-0 bg-[#FFFFFF]/90 overflow-y-auto overflow-x-hidden">
+          <div className="p-4 pb-28 md:p-6 md:pb-8 space-y-6">
           {/* TAB 1: ANALYTICS OVERVIEW */}
           {activeTab === "analytics" && (
             <div className="space-y-6">
@@ -2050,7 +2050,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             canInstallPwa={Boolean(deferredInstallPrompt)}
             onInstallPwa={handleInstallPwa}
           />
-          </SimpleBar>
+          </div>
         </main>
       </div>
 
