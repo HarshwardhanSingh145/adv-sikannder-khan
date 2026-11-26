@@ -112,6 +112,7 @@ export interface CaseRecord {
   clientMobile: string;
   caseTitle: string;
   caseNumber: string;
+  firNumber?: string;
   courtName: string;
   courtRoomNumber: string;
   caseType: string; // Civil, Criminal, etc.
@@ -121,6 +122,7 @@ export interface CaseRecord {
   advocateName: string; // Adv. Sikandar Khan
   filingDate: string;
   currentStage: CaseStage;
+  isCustomStage?: boolean;
   currentStatus: CaseStatus;
   priority: CasePriority;
   caseTags: string[];
@@ -161,6 +163,7 @@ export interface HearingReminder {
   clientName: string;
   courtName: string;
   courtRoom: string;
+  caseStage?: string;
   hearingDate: string;
   hearingTime: string;
   type: "7_days" | "3_days" | "1_day" | "5_am" | "8_am" | "time_alert";

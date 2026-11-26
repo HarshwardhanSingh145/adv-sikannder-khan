@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { X, Calendar as CalendarIcon, Clock, MapPin, Scale, User, FileText, ChevronRight, Edit3, Download } from "lucide-react";
-import { CaseRecord, HearingRecord } from "../../../types/admin";
+import { X, Calendar as CalendarIcon, Clock, MapPin, ChevronRight, Edit3, Download, Ban } from "lucide-react";
+import { CaseRecord } from "../../../types/admin";
 import { downloadTodaysHearingPdf } from "../../../lib/todaysHearingPdfGenerator";
+import { getCourtHoliday, getHolidayBlockMessage } from "../../../data/courtHolidays";
+import { formatDateDMY } from "../../../lib/dateFormat";
 
 interface CalendarHearingModalProps {
   dateStr: string;
@@ -22,10 +24,20 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
   const [rescheduleHearingId, setRescheduleHearingId] = useState<string | null>(null);
   const [newDateInput, setNewDateInput] = useState<string>(dateStr);
   const [newNotesInput, setNewNotesInput] = useState<string>("");
+  const [rescheduleError, setRescheduleError] = useState<string>("");
+
+  const currentDayHoliday = getCourtHoliday(dateStr);
+  const selectedRescheduleHolidayMsg = getHolidayBlockMessage(newDateInput);
 
   const handleRescheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const holidayMsg = getHolidayBlockMessage(newDateInput);
+    if (holidayMsg) {
+      setRescheduleError(holidayMsg);
+      return;
+    }
     if (rescheduleCaseId && rescheduleHearingId && newDateInput) {
+      setRescheduleError("");
       onUpdateHearingDate(rescheduleCaseId, rescheduleHearingId, newDateInput, newNotesInput);
       setRescheduleCaseId(null);
       setRescheduleHearingId(null);
@@ -38,34 +50,64 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#475569]/25 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#1D4ED8] flex items-center justify-center shadow-md shadow-[#1D4ED8]/15">
-              <CalendarIcon className="w-5 h-5 text-[#EFF6FF]" />
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md ${currentDayHoliday ? "bg-red-600 shadow-red-600/20" : "bg-[#1D4ED8] shadow-[#1D4ED8]/15"}`}>
+              {currentDayHoliday ? (
+                <Ban className="w-5 h-5 text-white" />
+              ) : (
+                <CalendarIcon className="w-5 h-5 text-[#EFF6FF]" />
+              )}
             </div>
             <div>
-              <h3 className="text-sm font-bold font-serif text-[#0F172A]">Court Schedule: {dateStr}</h3>
-              <p className="text-[11px] text-[#1D4ED8] font-semibold">{casesForDate.length} Cause List Appearance(s)</p>
+              <h3 className="text-sm font-bold font-serif text-[#0F172A]">Court Schedule: {formatDateDMY(dateStr)}</h3>
+              <p className={`text-[11px] font-semibold ${currentDayHoliday ? "text-red-700" : "text-[#1D4ED8]"}`}>
+                {currentDayHoliday
+                  ? `Government Holiday — ${currentDayHoliday.name}`
+                  : `${casesForDate.length} Cause List Appearance(s)`}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => downloadTodaysHearingPdf(casesForDate, dateStr)}
-              className="px-3 py-1.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              title="Download Cause List PDF for this date"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download PDF</span>
-            </button>
+            {!currentDayHoliday && (
+              <button
+                onClick={() => downloadTodaysHearingPdf(casesForDate, dateStr)}
+                className="px-3 py-1.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                title="Download Cause List PDF for this date"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download PDF</span>
+              </button>
+            )}
             <button onClick={onClose} className="p-1.5 rounded-lg text-[#475569] hover:text-[#0F172A] hover:bg-black/5 cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
+        {/* Government Holiday Notice */}
+        {currentDayHoliday && (
+          <div role="alert" className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-900 space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wide text-red-700">
+              <Ban className="w-4 h-4 shrink-0" />
+              <span>Court Closed — Government Holiday</span>
+            </div>
+            <p className="text-sm font-bold text-red-950">
+              {currentDayHoliday.name}
+              {currentDayHoliday.moonDependent ? " *" : ""}
+            </p>
+            <p className="text-xs text-red-800">
+              Rajasthan High Court Civil Courts Calendar ({dateStr.slice(0, 4)}) marks this date as an official holiday. New hearings cannot be scheduled on this date.
+              {currentDayHoliday.moonDependent ? " (* Subject to visibility of the Moon.)" : ""}
+            </p>
+          </div>
+        )}
+
         {/* List of cases scheduled for this date */}
         {casesForDate.length === 0 ? (
-          <div className="p-8 text-center bg-white/60 rounded-xl border border-[#475569]/20 text-xs text-[#1D4ED8] font-semibold">
-            No court hearings scheduled for {dateStr}.
-          </div>
+          !currentDayHoliday && (
+            <div className="p-8 text-center bg-white/60 rounded-xl border border-[#475569]/20 text-xs text-[#1D4ED8] font-semibold">
+              No court hearings scheduled for {formatDateDMY(dateStr)}.
+            </div>
+          )
         ) : (
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
             {casesForDate.map((c) => {
@@ -110,15 +152,20 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
                   {isReschedulingThis ? (
                     <form onSubmit={handleRescheduleSubmit} className="p-3 bg-white border border-[#475569]/35 rounded-lg space-y-2">
                       <h5 className="text-[11px] font-bold text-[#0F172A]">Reschedule Hearing Date</h5>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
                           <label className="block text-[10px] font-semibold text-[#1D4ED8]">New Hearing Date</label>
                           <input
                             type="date"
                             required
                             value={newDateInput}
-                            onChange={(e) => setNewDateInput(e.target.value)}
-                            className="w-full bg-[#FFFFFF]/80 border border-[#475569]/25 rounded p-1.5 text-[#0F172A] font-semibold"
+                            onChange={(e) => {
+                              setNewDateInput(e.target.value);
+                              setRescheduleError(getHolidayBlockMessage(e.target.value) || "");
+                            }}
+                            className={`w-full bg-[#FFFFFF]/80 border rounded p-1.5 text-[#0F172A] font-semibold ${
+                              selectedRescheduleHolidayMsg ? "border-red-500 bg-red-50/50" : "border-[#475569]/25"
+                            }`}
                           />
                         </div>
                         <div>
@@ -132,11 +179,28 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
                           />
                         </div>
                       </div>
+                      {(rescheduleError || selectedRescheduleHolidayMsg) && (
+                        <p role="alert" className="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 rounded-md px-2.5 py-1.5 flex items-center gap-1.5">
+                          <Ban className="w-3.5 h-3.5 shrink-0" />
+                          <span>{rescheduleError || selectedRescheduleHolidayMsg}</span>
+                        </p>
+                      )}
                       <div className="flex justify-end gap-2 pt-1">
-                        <button type="button" onClick={() => setRescheduleCaseId(null)} className="px-3 py-1 border border-[#475569]/25 rounded text-[#0F172A] text-[10px] font-semibold cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRescheduleCaseId(null);
+                            setRescheduleError("");
+                          }}
+                          className="px-3 py-1 border border-[#475569]/25 rounded text-[#0F172A] text-[10px] font-semibold cursor-pointer"
+                        >
                           Cancel
                         </button>
-                        <button type="submit" className="px-3 py-1 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded text-[10px] cursor-pointer">
+                        <button
+                          type="submit"
+                          disabled={Boolean(selectedRescheduleHolidayMsg)}
+                          className="px-3 py-1 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] disabled:bg-red-300 disabled:cursor-not-allowed font-bold rounded text-[10px] cursor-pointer"
+                        >
                           Save Reschedule
                         </button>
                       </div>
@@ -147,9 +211,11 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
                         type="button"
                         onClick={() => {
                           if (hearing) {
+                            const initDate = hearing.nextHearingDate || hearing.currentHearingDate || dateStr;
                             setRescheduleCaseId(c.id);
                             setRescheduleHearingId(hearing.id);
-                            setNewDateInput(hearing.nextHearingDate || hearing.currentHearingDate || dateStr);
+                            setNewDateInput(initDate);
+                            setRescheduleError(getHolidayBlockMessage(initDate) || "");
                           }
                         }}
                         className="text-[11px] text-[#1D4ED8] hover:text-[#0F172A] flex items-center gap-1 font-bold cursor-pointer"

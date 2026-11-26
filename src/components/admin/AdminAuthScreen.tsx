@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { useAdmin } from "../../context/AdminContext";
 import { Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { PremiumBackground } from "./PremiumBackground";
-import { DownloadAppBanner } from "../DownloadAppBanner";
 
 export function AdminAuthScreen() {
   const { loginWithPin, failedPinAttempts, lockoutEndTime } = useAdmin();
@@ -49,7 +48,7 @@ export function AdminAuthScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="relative z-10 min-h-dvh w-full flex flex-col items-center justify-center px-4 py-8 sm:py-10 overflow-x-hidden"
+      className="relative z-10 min-h-dvh w-full flex flex-col items-center justify-center px-4 py-8 sm:py-10 safe-pt safe-pb overflow-x-hidden"
     >
       <PremiumBackground />
 
@@ -156,10 +155,6 @@ export function AdminAuthScreen() {
           </motion.button>
         </form>
       </motion.div>
-
-        <div className="w-full max-w-md">
-          <DownloadAppBanner compact />
-        </div>
       </div>
     </motion.main>
   );

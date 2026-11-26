@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { CaseRecord, CaseNoteItem, CaseAttachment } from "../../types/admin";
 import { useAdmin } from "../../context/AdminContext";
+import { formatDateDMY } from "../../lib/dateFormat";
 
 interface CaseNotesAndAttachmentsProps {
   caseRecord: CaseRecord;
@@ -217,7 +218,7 @@ export const CaseNotesAndAttachments: React.FC<CaseNotesAndAttachmentsProps> = (
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] text-[#475569] flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-[#475569]/80" /> {note.createdAt}
+                      <Calendar className="w-3 h-3 text-[#475569]/80" /> {formatDateDMY(note.createdAt)}
                     </span>
                     <button
                       type="button"
@@ -372,7 +373,7 @@ export const CaseNotesAndAttachments: React.FC<CaseNotesAndAttachmentsProps> = (
                       <p className="text-xs text-[#1D4ED8] mt-1 line-clamp-2">{att.description}</p>
                     )}
                     <p className="text-[10px] text-[#475569] mt-2">
-                      Uploaded: {att.uploadedAt} • {att.fileSize || "1 MB"}
+                      Uploaded: {formatDateDMY(att.uploadedAt)} • {att.fileSize || "1 MB"}
                     </p>
                   </div>
 
@@ -604,7 +605,7 @@ export const CaseNotesAndAttachments: React.FC<CaseNotesAndAttachmentsProps> = (
               <div>
                 <h3 className="text-sm font-bold font-serif text-[#0F172A]">{previewAttachment.title}</h3>
                 <p className="text-[10px] text-[#475569]">
-                  {previewAttachment.fileName} • {previewAttachment.uploadedAt}
+                  {previewAttachment.fileName} • {formatDateDMY(previewAttachment.uploadedAt)}
                 </p>
               </div>
               <div className="flex items-center gap-2">

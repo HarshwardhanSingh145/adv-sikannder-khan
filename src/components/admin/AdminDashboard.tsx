@@ -3,7 +3,6 @@ import gsap from "gsap";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import { PremiumBackground } from "./PremiumBackground";
-import { DownloadAppBanner } from "../DownloadAppBanner";
 import {
   Scale,
   Users,
@@ -38,9 +37,8 @@ import {
   Receipt,
   LayoutGrid,
   Smartphone,
+  Ban,
 } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
-import { App as CapacitorApp } from "@capacitor/app";
 import { useAdmin } from "../../context/AdminContext";
 import { CaseRecord, CaseStage, ClientProfile, NewsItem, FeePaymentRecord } from "../../types/admin";
 import { motion, AnimatePresence } from "motion/react";
@@ -54,6 +52,8 @@ const GoogleSheetsManager = React.lazy(() => import('./GoogleSheetsManager').the
 const CaseNotesAndAttachments = React.lazy(() => import('./CaseNotesAndAttachments').then(module => ({ default: module.CaseNotesAndAttachments })));
 const HearingPdfManagerTab = React.lazy(() => import('./HearingPdfManagerTab').then(module => ({ default: module.HearingPdfManagerTab })));
 import { downloadTodaysHearingPdf, getTodaysHearingCases, getTodayDateStr } from "../../lib/todaysHearingPdfGenerator";
+import { getCourtHoliday, getHolidaysForMonth, getHolidayBlockMessage } from "../../data/courtHolidays";
+import { formatDateDMY, formatDateTimeDMY, getLocalDateIso, addDaysToIso } from "../../lib/dateFormat";
 
 
 
@@ -191,17 +191,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     caseBackground: "None",
     courtName: "ACJM Makrana",
     caseNumber: "",
+    firNumber: "",
     act: "Section 138 NI Act",
     stageOption: "Charge",
     customStageInput: "",
+    firstHearingDate: getLocalDateIso(),
+    secondHearingDate: "",
   });
   const [newCaseMobileError, setNewCaseMobileError] = useState("");
+  const [newCaseHolidayError, setNewCaseHolidayError] = useState("");
 
   const [newHearingData, setNewHearingData] = useState({
     currentHearingDate: new Date().toISOString().split("T")[0],
     nextHearingDate: "",
     purpose: "Evidence Recording",
   });
+  const [hearingDateError, setHearingDateError] = useState("");
 
   const [causeListText, setCauseListText] = useState("");
   const [aiQueryText, setAiQueryText] = useState("");
@@ -250,26 +255,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
   }, []);
-
-  // Native Android hardware back button handling
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    let listenerHandle: { remove: () => Promise<void> } | null = null;
-    CapacitorApp.addListener("backButton", () => {
-      if (showMobileMoreSheet) setShowMobileMoreSheet(false);
-      else if (showNotificationsDrawer) setShowNotificationsDrawer(false);
-      else if (showNewCaseModal) setShowNewCaseModal(false);
-      else if (showAddHearingModal) setShowAddHearingModal(false);
-      else if (activeCase) setActiveCase(null);
-      else if (activeTab !== "analytics") setActiveTab("analytics");
-      else CapacitorApp.exitApp();
-    }).then((handle) => {
-      listenerHandle = handle;
-    });
-    return () => {
-      listenerHandle?.remove();
-    };
-  }, [showMobileMoreSheet, showNotificationsDrawer, showNewCaseModal, showAddHearingModal, activeCase, activeTab, setActiveCase]);
 
   const handleInstallPwa = async () => {
     if (!deferredInstallPrompt) return;
@@ -354,6 +339,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     }
     setNewCaseMobileError("");
 
+    // Block scheduling 1st or 2nd hearing date on a Government Holiday
+    const firstHolidayMsg = getHolidayBlockMessage(newCaseData.firstHearingDate);
+    if (firstHolidayMsg) {
+      setNewCaseHolidayError(firstHolidayMsg);
+      showToast(firstHolidayMsg);
+      return;
+    }
+    const secondHolidayMsg = getHolidayBlockMessage(newCaseData.secondHearingDate);
+    if (secondHolidayMsg) {
+      setNewCaseHolidayError(secondHolidayMsg);
+      showToast(secondHolidayMsg);
+      return;
+    }
+    setNewCaseHolidayError("");
+
     const finalStage = newCaseData.stageOption === "Custom" 
       ? (newCaseData.customStageInput.trim() || "Custom Stage") 
       : newCaseData.stageOption;
@@ -361,33 +361,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     addCase({
       caseTitle: `${newCaseData.partyName} vs. ${newCaseData.opponentName}`,
       caseNumber: newCaseData.caseNumber,
+      firNumber: newCaseData.firNumber.trim() || undefined,
       clientName: newCaseData.partyName,
       partyName: newCaseData.partyName,
       clientMobile: cleanMobile,
       opponentName: newCaseData.opponentName,
       courtName: newCaseData.courtName,
+      courtRoomNumber: newCaseData.courtName,
+      advocateName: "Adv. Sikandar Khan",
+      filingDate: todayStr,
       caseType: newCaseData.caseType,
       caseBackground: newCaseData.caseBackground,
       act: newCaseData.act,
       currentStage: finalStage as CaseStage,
+      isCustomStage: newCaseData.stageOption === "Custom",
       currentStatus: "Active",
       priority: "high",
-      hearings: [
-        {
-          id: `h_${Date.now()}`,
-          currentHearingDate: todayStr,
-          nextHearingDate: "",
-          hearingTime: "10:30 AM",
-          courtRoomNumber: newCaseData.courtName,
-          judgeName: "Hon'ble Presiding Judge",
-          purpose: "Initial Hearing & Notice",
-        },
-      ],
-      documents: [],
-      evidence: [],
+      firstHearingDate: newCaseData.firstHearingDate || todayStr,
+      secondHearingDate: newCaseData.secondHearingDate || "",
       attachments: [],
       caseNotes: [],
-      stickyNotes: [],
       caseTags: ["#NewCase"],
       isPinned: false,
       isStarred: false,
@@ -404,15 +397,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       caseBackground: "None",
       courtName: "ACJM Makrana",
       caseNumber: "",
+      firNumber: "",
       act: "Section 138 NI Act",
       stageOption: "Charge",
       customStageInput: "",
+      firstHearingDate: getLocalDateIso(),
+      secondHearingDate: "",
     });
     setNewCaseMobileError("");
+    setNewCaseHolidayError("");
   };
 
   const handleAddHearingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const currentHolidayMsg = getHolidayBlockMessage(newHearingData.currentHearingDate);
+    if (currentHolidayMsg) {
+      setHearingDateError(currentHolidayMsg);
+      showToast(currentHolidayMsg);
+      return;
+    }
+    const nextHolidayMsg = getHolidayBlockMessage(newHearingData.nextHearingDate);
+    if (nextHolidayMsg) {
+      setHearingDateError(nextHolidayMsg);
+      showToast(nextHolidayMsg);
+      return;
+    }
+    setHearingDateError("");
+
     const targetCase = activeCase || cases.find((c) => c.id === selectedHearingCaseId) || cases[0];
     if (!targetCase) {
       showToast("Please create a case record before scheduling a hearing.");
@@ -561,8 +572,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
            phone = phone.replace(/\D/g, "");
            if (phone.length === 10) phone = "91" + phone;
            
-           const dateObj = new Date(tomorrowStr);
-           const formattedDate = dateObj.toLocaleDateString("hi-IN", { day: 'numeric', month: 'long', year: 'numeric' });
+           const formattedDate = formatDateDMY(tomorrowStr);
            
            const text = encodeURIComponent(`नमस्ते ${c.clientName} जी,\n\nयह एक अनुस्मारक है कि आपके केस (${c.caseNumber} - ${c.caseTitle}) की सुनवाई कल (${formattedDate}) माननीय न्यायालय (${c.courtName}) में निर्धारित है। कृपया समय पर उपस्थित रहें।\n\nधन्यवाद,\nएडवोकेट सिकंदर खान`);
            
@@ -611,7 +621,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
             <span className="text-[10px] text-[#475569] uppercase tracking-wider font-semibold">
-              {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
+              {formatDateDMY(currentTime)}
             </span>
           </div>
 
@@ -930,7 +940,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         </div>
                         <div className="sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
                           <span className="text-xs font-bold text-[#1D4ED8] block">
-                            {c.hearings[0]?.currentHearingDate || "Pending Schedule"}
+                            {formatDateDMY(c.hearings[0]?.currentHearingDate) || "Pending Schedule"}
                           </span>
                           <span className="text-[10px] text-emerald-600 font-bold">{c.currentStage}</span>
                         </div>
@@ -1090,10 +1100,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-lg shadow-black/50">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#475569]/20 pb-4">
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold">
                             {activeCase.caseNumber}
                           </span>
+                          {activeCase.firNumber && (
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-900 font-bold">
+                              FIR: {activeCase.firNumber}
+                            </span>
+                          )}
                           <span className="text-xs px-2.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-bold">
                             {activeCase.currentStatus}
                           </span>
@@ -1198,7 +1213,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <div className="p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl space-y-2">
                             <div className="flex items-center justify-between text-xs">
                               <span className="font-bold text-[#0F172A]">
-                                {h.currentHearingDate} ({h.hearingTime})
+                                1st: {formatDateDMY(h.currentHearingDate)} ({h.hearingTime})
+                                {h.nextHearingDate && (
+                                  <span className="ml-2 text-[#1D4ED8]">• 2nd: {formatDateDMY(h.nextHearingDate)}</span>
+                                )}
                               </span>
                               <div className="flex items-center gap-2">
                                 <span className="text-[#475569]">{h.judgeName}</span>
@@ -1255,7 +1273,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <span className="font-mono text-[11px] font-bold text-[#1D4ED8] block">{c.caseNumber}</span>
+                              <span className="font-mono text-[11px] font-bold text-[#1D4ED8] block">
+                                {c.caseNumber}
+                                {c.firNumber ? ` • FIR: ${c.firNumber}` : ""}
+                              </span>
                               <h3 className="text-sm font-bold text-[#0F172A] truncate">{c.partyName || c.clientName}</h3>
                               {c.opponentName && (
                                 <p className="text-[11px] text-[#1D4ED8] truncate">vs. {c.opponentName}</p>
@@ -1278,7 +1299,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           </div>
                           <div className="flex items-center justify-between pt-2 border-t border-[#475569]/15 text-[11px]">
                             <span className="font-semibold text-[#1D4ED8]">
-                              Next: <strong className="text-[#0F172A]">{c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}</strong>
+                              Next: <strong className="text-[#0F172A]">{formatDateDMY(c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate) || "Pending"}</strong>
                             </span>
                             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                               <button
@@ -1334,7 +1355,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               {c.opponentName && <span className="block text-[10px] text-[#1D4ED8] font-semibold">vs. {c.opponentName}</span>}
                               {c.clientMobile && <span className="block text-[10px] text-[#1E40AF] font-bold">📱 {c.clientMobile}</span>}
                             </td>
-                            <td className="p-3.5 font-mono text-[#0F172A] font-bold">{c.caseNumber}</td>
+                            <td className="p-3.5 font-mono text-[#0F172A] font-bold">
+                              {c.caseNumber}
+                              {c.firNumber && <span className="block text-[10px] text-amber-800 font-semibold">FIR: {c.firNumber}</span>}
+                            </td>
                             <td className="p-3.5">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                 c.caseType.toLowerCase().includes("criminal") ? "bg-rose-100 border border-rose-300 text-rose-900" : "bg-sky-100 border border-sky-300 text-sky-900"
@@ -1349,7 +1373,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               </span>
                             </td>
                             <td className="p-3.5 font-bold text-[#0F172A]">
-                              {c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}
+                              {formatDateDMY(c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate) || "Pending"}
                             </td>
                             <td className="p-3.5">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -1464,22 +1488,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const now = new Date();
-                      setCalendarMonth({ year: now.getFullYear(), month: now.getMonth() });
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-[#1D4ED8] text-[#EFF6FF] text-xs font-bold hover:bg-[#1E40AF] cursor-pointer"
-                  >
-                    Today
-                  </button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-lg">
+                      <Ban className="w-3.5 h-3.5" />
+                      Govt Holiday (Hearing Blocked)
+                    </span>
+                    {calendarMonth.year !== 2027 && (
+                      <button
+                        type="button"
+                        onClick={() => setCalendarMonth({ year: 2027, month: 0 })}
+                        className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 cursor-pointer"
+                      >
+                        2027 Holidays
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const now = new Date();
+                        setCalendarMonth({ year: now.getFullYear(), month: now.getMonth() });
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-[#1D4ED8] text-[#EFF6FF] text-xs font-bold hover:bg-[#1E40AF] cursor-pointer"
+                    >
+                      Today
+                    </button>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
                   <div className="min-w-[540px] space-y-2">
                     <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#0F172A] uppercase border-b border-[#475569]/20 pb-2">
-                      <span>Sun</span>
+                      <span className="text-red-600">Sun</span>
                       <span>Mon</span>
                       <span>Tue</span>
                       <span>Wed</span>
@@ -1503,28 +1542,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             const dateStr = `${calendarMonth.year}-${monthStr}-${String(dayNum).padStart(2, "0")}`;
                             const dayCases = casesByDate.get(dateStr) || [];
                             const isTodayCell = dateStr === todayStr;
+                            const holiday = getCourtHoliday(dateStr);
 
                             return (
                               <button
                                 type="button"
                                 key={dateStr}
+                                title={
+                                  holiday
+                                    ? `Government Holiday: ${holiday.name} — Hearing cannot be scheduled`
+                                    : undefined
+                                }
                                 onClick={() => setCalendarModalState({ show: true, dateStr, cases: dayCases })}
-                                className={`p-2 text-left border rounded-xl min-h-[78px] space-y-1 transition-all cursor-pointer flex flex-col items-stretch justify-start ${
-                                  isTodayCell
+                                className={`p-2 text-left border rounded-xl min-h-[82px] space-y-1 transition-all cursor-pointer flex flex-col items-stretch justify-start ${
+                                  holiday
+                                    ? "bg-red-50/90 border-red-300 hover:border-red-400 hover:bg-red-100/70"
+                                    : isTodayCell
                                     ? "bg-white border-[#1D4ED8] ring-2 ring-[#1D4ED8]/20 shadow-sm"
                                     : "border-[#475569]/20 bg-[#FFFFFF]/90 hover:border-[#1D4ED8]/50 hover:bg-white/70"
                                 }`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <span className={`text-[11px] font-bold ${isTodayCell ? "text-[#1D4ED8]" : "text-[#0F172A]"}`}>
+                                <div className="flex items-center justify-between gap-1">
+                                  <span
+                                    className={`text-[11px] font-bold ${
+                                      holiday ? "text-red-700" : isTodayCell ? "text-[#1D4ED8]" : "text-[#0F172A]"
+                                    }`}
+                                  >
                                     {dayNum}
                                   </span>
-                                  {isTodayCell && (
-                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#1D4ED8] text-[#EFF6FF]">
-                                      Today
+                                  {holiday ? (
+                                    <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-600 text-white">
+                                      Holiday
                                     </span>
+                                  ) : (
+                                    isTodayCell && (
+                                      <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#1D4ED8] text-[#EFF6FF]">
+                                        Today
+                                      </span>
+                                    )
                                   )}
                                 </div>
+                                {holiday && (
+                                  <div className="px-1.5 py-0.5 rounded bg-red-100 border border-red-200 text-[9px] font-bold text-red-800 leading-tight line-clamp-2">
+                                    {holiday.name}{holiday.moonDependent ? "*" : ""}
+                                  </div>
+                                )}
                                 {dayCases.slice(0, 2).map((dh: CaseRecord) => (
                                   <div key={dh.id} className="p-1 rounded bg-[#1D4ED8]/10 border border-[#1D4ED8]/30 text-[9px] font-bold text-[#1D4ED8] truncate">
                                     • {dh.caseNumber}
@@ -1541,6 +1603,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Government Holidays List for Current Month */}
+                {(() => {
+                  const monthHolidays = getHolidaysForMonth(calendarMonth.year, calendarMonth.month);
+                  if (monthHolidays.length === 0) return null;
+                  return (
+                    <div className="p-4 rounded-2xl bg-red-50/75 border border-red-200 space-y-2.5">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-red-800 flex items-center gap-1.5">
+                          <Ban className="w-3.5 h-3.5" />
+                          Government Holidays in{" "}
+                          {new Date(calendarMonth.year, calendarMonth.month, 1).toLocaleDateString("en-IN", {
+                            month: "long",
+                            year: "numeric",
+                          })}{" "}
+                          (No Court Hearings)
+                        </h3>
+                        <span className="text-[11px] font-semibold text-red-700">
+                          Rajasthan High Court Calendar {calendarMonth.year}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {monthHolidays.map((h) => {
+                          const dayLabel = formatDateDMY(h.date);
+                          return (
+                            <div
+                              key={h.date}
+                              className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white/90 border border-red-200/80 text-xs"
+                            >
+                              <span className="font-bold font-mono text-red-700 shrink-0">{dayLabel}</span>
+                              <span className="font-semibold text-[#0F172A] text-right truncate" title={h.name}>
+                                {h.name}{h.moonDependent ? "*" : ""}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {monthHolidays.some((h) => h.moonDependent) && (
+                        <p className="text-[10px] text-red-700 font-medium">
+                          * Holidays marked with an asterisk depend on visibility of the Moon.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -1713,7 +1820,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     </div>
                     <h4 className="text-sm font-bold text-[#0F172A]">{item.title}</h4>
                     <p className="text-xs text-[#1D4ED8]">{item.content}</p>
-                    <span className="text-[10px] text-[#475569]/80 block pt-1">Published: {item.publishedAt}</span>
+                    <span className="text-[10px] text-[#475569]/80 block pt-1">Published: {formatDateDMY(item.publishedAt)}</span>
                   </div>
                 ))}
               </div>
@@ -2031,7 +2138,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <p className="font-bold text-[#0F172A]">{log.action}</p>
                           <p className="text-[#475569] text-[11px] truncate">{log.details}</p>
                         </div>
-                        <span className="text-[10px] text-[#475569]/80 shrink-0">{log.timestamp}</span>
+                        <span className="text-[10px] text-[#475569]/80 shrink-0">{formatDateTimeDMY(log.timestamp)}</span>
                       </div>
                     ))}
                   </div>
@@ -2044,12 +2151,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {activeTab === "pdf-manager" && (
             <HearingPdfManagerTab onShowToast={showToast} onNavigateTab={setActiveTab} />
           )}
-
-          {/* Bottom Download Android App Section (visible on web) */}
-          <DownloadAppBanner
-            canInstallPwa={Boolean(deferredInstallPrompt)}
-            onInstallPwa={handleInstallPwa}
-          />
           </div>
         </main>
       </div>
@@ -2225,7 +2326,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 <div>
                   <h3 className="text-base font-serif font-bold text-[#0F172A]">Hearing Reminders</h3>
                   <p className="text-[11px] text-[#475569]">
-                    {reminders.filter((r) => r.isTriggered).length} active alert(s) • {reminders.length} scheduled
+                    {reminders.length} active • Argument &amp; Custom stages on {formatDateDMY(addDaysToIso(getLocalDateIso(), 3))} (3 days ahead)
                   </p>
                 </div>
                 <button
@@ -2239,12 +2340,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {reminders.length === 0 ? (
-                  <p className="text-xs text-[#475569] text-center py-8">No upcoming hearing reminders.</p>
+                  <p className="text-xs text-[#475569] text-center py-8">
+                    No Argument or Custom stage cases scheduled for {formatDateDMY(addDaysToIso(getLocalDateIso(), 3))} (3 days from today).
+                  </p>
                 ) : (
-                  reminders
-                    .filter((r) => r.isTriggered)
-                    .slice(0, 20)
-                    .map((rem) => (
+                  reminders.map((rem) => (
                       <button
                         type="button"
                         key={rem.id}
@@ -2256,13 +2356,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           }
                           setShowNotificationsDrawer(false);
                         }}
-                        className="w-full text-left p-3.5 bg-white/90 hover:bg-white border border-[#475569]/20 rounded-xl space-y-1 transition-all cursor-pointer shadow-xs"
+                        className="w-full text-left p-3.5 bg-white/90 hover:bg-white border border-[#475569]/20 rounded-xl space-y-1.5 transition-all cursor-pointer shadow-xs"
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#1D4ED8]/10 text-[#1D4ED8]">
-                            {rem.caseNumber}
-                          </span>
-                          <span className="text-[10px] text-[#475569] font-semibold">{rem.hearingDate}</span>
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#1D4ED8]/10 text-[#1D4ED8]">
+                              {rem.caseNumber}
+                            </span>
+                            {rem.caseStage && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                                {rem.caseStage}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-mono text-[#475569] font-bold">{formatDateDMY(rem.hearingDate)}</span>
                         </div>
                         <p className="text-xs font-bold text-[#0F172A]">{rem.message}</p>
                         <p className="text-[11px] text-[#1D4ED8]">{rem.courtName}</p>
@@ -2398,7 +2505,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[#1D4ED8] mb-1 font-bold">Case Number *</label>
                     <input
@@ -2407,6 +2514,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       placeholder="e.g., CIS/2026/0491"
                       value={newCaseData.caseNumber}
                       onChange={(e) => setNewCaseData({ ...newCaseData, caseNumber: e.target.value })}
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">FIR Number</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., FIR 142/2026"
+                      value={newCaseData.firNumber}
+                      onChange={(e) => setNewCaseData({ ...newCaseData, firNumber: e.target.value })}
                       className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
@@ -2422,6 +2539,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="new-case-1st-hearing" className="block text-[#1D4ED8] mb-1 font-bold">
+                      1st Hearing Date * {newCaseData.firstHearingDate && <span className="font-mono text-[#0F172A]">({formatDateDMY(newCaseData.firstHearingDate)})</span>}
+                    </label>
+                    <input
+                      id="new-case-1st-hearing"
+                      type="date"
+                      required
+                      value={newCaseData.firstHearingDate}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewCaseData({ ...newCaseData, firstHearingDate: val });
+                        setNewCaseHolidayError(
+                          getHolidayBlockMessage(val) || getHolidayBlockMessage(newCaseData.secondHearingDate) || ""
+                        );
+                      }}
+                      className={`w-full bg-white border rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8] ${
+                        getHolidayBlockMessage(newCaseData.firstHearingDate) ? "border-red-500 bg-red-50/50" : "border-[#475569]/35"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="new-case-2nd-hearing" className="block text-[#1D4ED8] mb-1 font-bold">
+                      2nd Hearing Date {newCaseData.secondHearingDate && <span className="font-mono text-[#0F172A]">({formatDateDMY(newCaseData.secondHearingDate)})</span>}
+                    </label>
+                    <input
+                      id="new-case-2nd-hearing"
+                      type="date"
+                      value={newCaseData.secondHearingDate}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewCaseData({ ...newCaseData, secondHearingDate: val });
+                        setNewCaseHolidayError(
+                          getHolidayBlockMessage(newCaseData.firstHearingDate) || getHolidayBlockMessage(val) || ""
+                        );
+                      }}
+                      className={`w-full bg-white border rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8] ${
+                        getHolidayBlockMessage(newCaseData.secondHearingDate) ? "border-red-500 bg-red-50/50" : "border-[#475569]/35"
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {(newCaseHolidayError ||
+                  getHolidayBlockMessage(newCaseData.firstHearingDate) ||
+                  getHolidayBlockMessage(newCaseData.secondHearingDate)) && (
+                  <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <Ban className="w-4 h-4 shrink-0" />
+                    <span>
+                      {newCaseHolidayError ||
+                        getHolidayBlockMessage(newCaseData.firstHearingDate) ||
+                        getHolidayBlockMessage(newCaseData.secondHearingDate)}
+                    </span>
+                  </p>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
@@ -2460,10 +2634,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#475569]/20">
-                  <button type="button" onClick={() => setShowNewCaseModal(false)} className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-[#FFFFFF]/90">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewCaseModal(false);
+                      setNewCaseHolidayError("");
+                    }}
+                    className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-[#FFFFFF]/90 cursor-pointer"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg hover:bg-[#1E40AF] shadow-md shadow-[#1D4ED8]/15 cursor-pointer">
+                  <button
+                    type="submit"
+                    disabled={Boolean(
+                      getHolidayBlockMessage(newCaseData.firstHearingDate) ||
+                        getHolidayBlockMessage(newCaseData.secondHearingDate)
+                    )}
+                    className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg hover:bg-[#1E40AF] disabled:bg-red-300 disabled:cursor-not-allowed shadow-md shadow-[#1D4ED8]/15 cursor-pointer"
+                  >
                     Create Case File
                   </button>
                 </div>
@@ -2546,8 +2734,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       type="date"
                       required
                       value={newHearingData.currentHearingDate}
-                      onChange={(e) => setNewHearingData({ ...newHearingData, currentHearingDate: e.target.value })}
-                      className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8]"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewHearingData({ ...newHearingData, currentHearingDate: val });
+                        setHearingDateError(
+                          getHolidayBlockMessage(val) || getHolidayBlockMessage(newHearingData.nextHearingDate) || ""
+                        );
+                      }}
+                      className={`w-full bg-white border rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8] ${
+                        getHolidayBlockMessage(newHearingData.currentHearingDate) ? "border-red-500 bg-red-50/50" : "border-[#475569]/30"
+                      }`}
                     />
                   </div>
                   <div>
@@ -2556,11 +2752,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       id="hearing-next-date"
                       type="date"
                       value={newHearingData.nextHearingDate}
-                      onChange={(e) => setNewHearingData({ ...newHearingData, nextHearingDate: e.target.value })}
-                      className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8]"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewHearingData({ ...newHearingData, nextHearingDate: val });
+                        setHearingDateError(
+                          getHolidayBlockMessage(newHearingData.currentHearingDate) || getHolidayBlockMessage(val) || ""
+                        );
+                      }}
+                      className={`w-full bg-white border rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8] ${
+                        getHolidayBlockMessage(newHearingData.nextHearingDate) ? "border-red-500 bg-red-50/50" : "border-[#475569]/30"
+                      }`}
                     />
                   </div>
                 </div>
+
+                {(hearingDateError ||
+                  getHolidayBlockMessage(newHearingData.currentHearingDate) ||
+                  getHolidayBlockMessage(newHearingData.nextHearingDate)) && (
+                  <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <Ban className="w-4 h-4 shrink-0" />
+                    <span>
+                      {hearingDateError ||
+                        getHolidayBlockMessage(newHearingData.currentHearingDate) ||
+                        getHolidayBlockMessage(newHearingData.nextHearingDate)}
+                    </span>
+                  </p>
+                )}
 
                 <div>
                   <label htmlFor="hearing-purpose" className="block text-[#1D4ED8] mb-1 font-semibold">Purpose of Hearing *</label>
@@ -2575,10 +2792,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#475569]/20">
-                  <button type="button" onClick={() => setShowAddHearingModal(false)} className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-white/60 cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddHearingModal(false);
+                      setHearingDateError("");
+                    }}
+                    className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-white/60 cursor-pointer"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg cursor-pointer hover:bg-[#1E40AF]">
+                  <button
+                    type="submit"
+                    disabled={Boolean(
+                      getHolidayBlockMessage(newHearingData.currentHearingDate) ||
+                        getHolidayBlockMessage(newHearingData.nextHearingDate)
+                    )}
+                    className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg cursor-pointer hover:bg-[#1E40AF] disabled:bg-red-300 disabled:cursor-not-allowed"
+                  >
                     Save Hearing
                   </button>
                 </div>
@@ -2657,8 +2888,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             setActiveTab("cases");
           }}
           onUpdateHearingDate={(caseId, hearingId, newDate, notes) => {
+            const holidayMsg = getHolidayBlockMessage(newDate);
+            if (holidayMsg) {
+              showToast(holidayMsg);
+              return;
+            }
             addHearingToCase(caseId, { currentHearingDate: newDate, purpose: notes || "Rescheduled hearing" });
-            showToast(`Hearing rescheduled to ${newDate}!`);
+            showToast(`Hearing rescheduled to ${formatDateDMY(newDate)}!`);
           }}
           onClose={() => setCalendarModalState({ show: false, dateStr: "", cases: [] })}
         />

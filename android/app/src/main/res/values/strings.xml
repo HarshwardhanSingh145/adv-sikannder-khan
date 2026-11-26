@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Adv. Sikandar Khan</string>
-    <string name="title_activity_main">Adv. Sikandar Khan</string>
-    <string name="package_name">com.advocatesikandarkhan.workspace</string>
-    <string name="custom_url_scheme">com.advocatesikandarkhan.workspace</string>
-</resources>

@@ -1,6 +1,7 @@
 import React from "react";
 import { X, Printer, Download, CheckCircle2, ShieldCheck, Scale } from "lucide-react";
 import { FeePaymentRecord } from "../../../types/admin";
+import { formatDateDMY } from "../../../lib/dateFormat";
 
 interface ReceiptModalProps {
   payment: FeePaymentRecord;
@@ -54,7 +55,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ payment, historyItem
               <p>Phone: +91 9257923773 | Email: advocate.sikandar@lawfirm.in</p>
             </div>
             <h3>FEE PAYMENT RECEIPT #${receipt.receiptNo}</h3>
-            <div className="row"><span>Date:</span> <strong>${receipt.date}</strong></div>
+            <div className="row"><span>Date:</span> <strong>${formatDateDMY(receipt.date)}</strong></div>
             <div className="row"><span>Received From (Client):</span> <strong>${payment.clientName}</strong></div>
             <div className="row"><span>Case Number:</span> <strong>${payment.caseNumber}</strong></div>
             <div className="row"><span>Payment Mode:</span> <strong>${receipt.mode}</strong></div>
@@ -108,7 +109,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ payment, historyItem
             </div>
             <div className="flex justify-between">
               <span className="text-[#475569] font-semibold">Payment Date:</span>
-              <span className="font-bold text-[#0F172A]">{receipt.date}</span>
+              <span className="font-bold text-[#0F172A]">{formatDateDMY(receipt.date)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#475569] font-semibold">Client Name:</span>

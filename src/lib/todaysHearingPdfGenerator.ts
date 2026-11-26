@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { CaseRecord } from "../types/admin";
+import { formatDateDMY } from "./dateFormat";
 
 export interface HearingPdfMeta {
   id: string;
@@ -110,27 +111,10 @@ export function buildTodaysHearingPdfDoc(
 
   if (targetDateStr && targetDateStr.trim()) {
     dateIso = targetDateStr.trim();
-    const parts = dateIso.split("-").map(Number);
-    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
-      const d = new Date(parts[0], parts[1] - 1, parts[2]);
-      dateFormatted = d.toLocaleDateString("en-IN", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      });
-    } else {
-      dateFormatted = dateIso;
-    }
+    dateFormatted = formatDateDMY(dateIso);
   } else {
     dateIso = getTodayDateStr();
-    const d = new Date();
-    dateFormatted = d.toLocaleDateString("en-IN", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+    dateFormatted = formatDateDMY(dateIso);
   }
 
   const fileName = `Todays_Hearing_List_${dateIso}.pdf`;
@@ -318,12 +302,63 @@ export function buildTodaysHearingPdfDoc(
   return { doc, fileName, caseCount, dateFormatted, dateIso };
 }
 
+function isIosDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 /**
- * Trigger direct one-click download of Today's Hearing List PDF
+ * iOS-safe file download/share helper (Safari standalone & WKWebView ignore `<a download>` on blobs)
+ */
+export function saveOrShareFileBlob(blob: Blob, fileName: string, title = fileName): void {
+  if (isIosDevice() && typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    try {
+      const file = new File([blob], fileName, { type: blob.type || "application/octet-stream" });
+      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title }).catch(() => {
+          const fallbackUrl = URL.createObjectURL(blob);
+          window.open(fallbackUrl, "_blank");
+        });
+        return;
+      }
+    } catch {
+      // Fall through to browser download
+    }
+  }
+
+  const blobUrl = URL.createObjectURL(blob);
+  if (isIosDevice()) {
+    const opened = window.open(blobUrl, "_blank");
+    if (!opened) {
+      window.location.assign(blobUrl);
+    }
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    return;
+  }
+
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+}
+
+/**
+ * Trigger direct one-click download of Today's Hearing List PDF (Android, Desktop, and iOS Share Sheet)
  */
 export function downloadTodaysHearingPdf(cases: CaseRecord[] | undefined | null, targetDateStr?: string): string {
   const { doc, fileName } = buildTodaysHearingPdfDoc(cases, targetDateStr);
-  doc.save(fileName);
+  if (isIosDevice()) {
+    const blob = doc.output("blob");
+    saveOrShareFileBlob(blob, fileName, "Today's Hearing List PDF");
+  } else {
+    doc.save(fileName);
+  }
   return fileName;
 }
 
@@ -340,7 +375,13 @@ export function getTodaysHearingPdfBlobUrl(cases: CaseRecord[] | undefined | nul
  * Open Print Dialog for Today's Hearing List PDF
  */
 export function printTodaysHearingPdf(cases: CaseRecord[] | undefined | null, targetDateStr?: string) {
-  const { doc } = buildTodaysHearingPdfDoc(cases, targetDateStr);
+  const { doc, fileName } = buildTodaysHearingPdfDoc(cases, targetDateStr);
+  if (isIosDevice()) {
+    // On iOS Safari / standalone / WKWebView, the native Share Sheet provides AirPrint + Save to Files
+    const blob = doc.output("blob");
+    saveOrShareFileBlob(blob, fileName, "Print Hearing List PDF");
+    return;
+  }
   doc.autoPrint();
   const blobUrl = URL.createObjectURL(doc.output("blob"));
   const printWindow = window.open(blobUrl, "_blank");
@@ -355,13 +396,14 @@ export function printTodaysHearingPdf(cases: CaseRecord[] | undefined | null, ta
  */
 export function getTodaysHearingSummaryText(cases: CaseRecord[] | undefined | null, targetDateStr?: string): string {
   const targetDate = targetDateStr || getTodayDateStr();
+  const formattedTargetDate = formatDateDMY(targetDate);
   const hearings = getTodaysHearingCases(cases, targetDate);
 
   if (hearings.length === 0) {
-    return `*चैंबर एडवोकेट सिकंदर खान*\nतारीख: ${targetDate}\n\nआज कोई अदालती पेशी (hearing) निर्धारित नहीं है।`;
+    return `*चैंबर एडवोकेट सिकंदर खान*\nतारीख: ${formattedTargetDate}\n\nआज कोई अदालती पेशी (hearing) निर्धारित नहीं है।`;
   }
 
-  let text = `*⚖️ दैनिक पेशी सूची - चैंबर एडवोकेट सिकंदर खान*\n📅 *तारीख:* ${targetDate}\n📋 *कुल पेशियां:* ${hearings.length}\n\n`;
+  let text = `*⚖️ दैनिक पेशी सूची - चैंबर एडवोकेट सिकंदर खान*\n📅 *तारीख:* ${formattedTargetDate}\n📋 *कुल पेशियां:* ${hearings.length}\n\n`;
 
   hearings.forEach((item, idx) => {
     const c = item.caseRecord;

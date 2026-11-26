@@ -40,6 +40,31 @@ import {
   saveAuditLogToFirestore,
   seedInitialDataIfEmpty,
 } from "../lib/firestoreSync";
+import { saveOrShareFileBlob } from "../lib/todaysHearingPdfGenerator";
+import { isCourtHoliday } from "../data/courtHolidays";
+import { formatDateDMY, getLocalDateIso, addDaysToIso } from "../lib/dateFormat";
+
+const NON_REMINDER_STANDARD_STAGES = new Set([
+  "charge",
+  "appearance of the accused",
+  "bail jump",
+  "evidence",
+  "order",
+  "judgment",
+  "notice issued",
+  "reply filed",
+  "filed",
+  "order reserved",
+]);
+
+export function isReminderEligibleStage(c: Pick<CaseRecord, "currentStage" | "isCustomStage">): boolean {
+  if (c.isCustomStage) return true;
+  const stage = (c.currentStage || "").trim().toLowerCase();
+  if (!stage) return false;
+  if (stage === "argument" || stage === "arguments") return true;
+  // Any stage not in the other standard presets is a Custom stage
+  return !NON_REMINDER_STANDARD_STAGES.has(stage);
+}
 
 interface AdminContextType {
   // Auth & Session
@@ -67,7 +92,12 @@ interface AdminContextType {
   cases: CaseRecord[];
   activeCase: CaseRecord | null;
   setActiveCase: (c: CaseRecord | null) => void;
-  addCase: (newCase: Omit<CaseRecord, "id" | "createdAt" | "updatedAt" | "hearings" | "documents" | "evidence" | "stickyNotes">) => void;
+  addCase: (
+    newCase: Omit<CaseRecord, "id" | "createdAt" | "updatedAt" | "hearings" | "documents" | "evidence" | "stickyNotes"> & {
+      firstHearingDate?: string;
+      secondHearingDate?: string;
+    }
+  ) => void;
   updateCase: (caseId: string, updates: Partial<CaseRecord>) => void;
   deleteCase: (caseId: string) => void;
   toggleStarCase: (caseId: string) => void;
@@ -328,91 +358,50 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     [cases, clients, news, payments, pin, saveToLocalStorage]
   );
 
-  // Compute Reminders & Auto-Publish 5:00 AM Hearing News
+  // Compute Reminders (ONLY Argument & Custom stage cases whose hearing is scheduled 3 days after today) & Auto-Publish 5:00 AM Hearing News
   useEffect(() => {
     const generatedReminders: HearingReminder[] = [];
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getLocalDateIso();
+    const targetReminderDateStr = addDaysToIso(todayStr, 3);
 
     cases.forEach((c) => {
       const latestHearing = c.hearings[0];
-      const hDate = latestHearing?.nextHearingDate || latestHearing?.currentHearingDate;
-      if (!hDate) return;
+      if (!latestHearing) return;
 
-      const dateObj = new Date(hDate);
-      const sevenDaysBefore = new Date(dateObj.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-      const threeDaysBefore = new Date(dateObj.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-      const oneDayBefore = new Date(dateObj.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+      // Check if this case is eligible for the Reminder bell:
+      // 1) Current Stage must be "Argument" or "Custom"
+      // 2) A hearing is scheduled exactly 3 days from today
+      if (isReminderEligibleStage(c)) {
+        const matchedHearing = c.hearings.find(
+          (h) =>
+            h.currentHearingDate === targetReminderDateStr ||
+            h.nextHearingDate === targetReminderDateStr
+        );
 
-      // 7 Days
-      generatedReminders.push({
-        id: `rem-7d-${c.id}`,
-        caseId: c.id,
-        caseNumber: c.caseNumber,
-        clientName: c.clientName,
-        courtName: c.courtName,
-        courtRoom: c.courtRoomNumber,
-        hearingDate: hDate,
-        hearingTime: latestHearing.hearingTime,
-        type: "7_days",
-        message: `Reminder: Hearing in 7 days for ${c.caseTitle}`,
-        triggerTime: `${sevenDaysBefore} 09:00 AM`,
-        isTriggered: todayStr >= sevenDaysBefore,
-        isPublishedToPortal: false,
-      });
-
-      // 3 Days
-      generatedReminders.push({
-        id: `rem-3d-${c.id}`,
-        caseId: c.id,
-        caseNumber: c.caseNumber,
-        clientName: c.clientName,
-        courtName: c.courtName,
-        courtRoom: c.courtRoomNumber,
-        hearingDate: hDate,
-        hearingTime: latestHearing.hearingTime,
-        type: "3_days",
-        message: `Urgent Reminder: Hearing in 3 days for ${c.caseTitle}`,
-        triggerTime: `${threeDaysBefore} 09:00 AM`,
-        isTriggered: todayStr >= threeDaysBefore,
-        isPublishedToPortal: false,
-      });
-
-      // 1 Day
-      generatedReminders.push({
-        id: `rem-1d-${c.id}`,
-        caseId: c.id,
-        caseNumber: c.caseNumber,
-        clientName: c.clientName,
-        courtName: c.courtName,
-        courtRoom: c.courtRoomNumber,
-        hearingDate: hDate,
-        hearingTime: latestHearing.hearingTime,
-        type: "1_day",
-        message: `Tomorrow's Hearing: Prepare files for ${c.caseNumber}`,
-        triggerTime: `${oneDayBefore} 05:00 PM`,
-        isTriggered: todayStr >= oneDayBefore,
-        isPublishedToPortal: true,
-      });
-
-      // Hearing Day 5:00 AM
-      const isTodayHearing = todayStr === hDate;
-      generatedReminders.push({
-        id: `rem-5am-${c.id}`,
-        caseId: c.id,
-        caseNumber: c.caseNumber,
-        clientName: c.clientName,
-        courtName: c.courtName,
-        courtRoom: c.courtRoomNumber,
-        hearingDate: hDate,
-        hearingTime: latestHearing.hearingTime,
-        type: "5_am",
-        message: `Today's Hearing at 5:00 AM Auto-Broadcast: ${c.caseTitle} at ${c.courtName}`,
-        triggerTime: `${hDate} 05:00 AM`,
-        isTriggered: isTodayHearing,
-        isPublishedToPortal: true,
-      });
+        if (matchedHearing) {
+          generatedReminders.push({
+            id: `rem-3d-${c.id}-${targetReminderDateStr}`,
+            caseId: c.id,
+            caseNumber: c.caseNumber,
+            clientName: c.clientName,
+            courtName: c.courtName,
+            courtRoom: c.courtRoomNumber,
+            caseStage: c.currentStage,
+            hearingDate: targetReminderDateStr,
+            hearingTime: matchedHearing.hearingTime || "10:30 AM",
+            type: "3_days",
+            message: `Hearing in 3 days (${formatDateDMY(targetReminderDateStr)}) — ${c.caseTitle}`,
+            triggerTime: `${formatDateDMY(todayStr)} 09:00 AM`,
+            isTriggered: true,
+            isPublishedToPortal: false,
+          });
+        }
+      }
 
       // Auto-publish today's hearing to news portal if not already present
+      const hDate = latestHearing.nextHearingDate || latestHearing.currentHearingDate;
+      const isTodayHearing =
+        hDate === todayStr || latestHearing.currentHearingDate === todayStr;
       if (isTodayHearing) {
         const newsTitle = `Today's Hearing: ${c.caseTitle}`;
         const alreadyExists = news.some((n) => n.caseNumber === c.caseNumber && n.category === "Today's Hearing");
@@ -574,22 +563,30 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   // Cases CRUD
-  const addCase = (newCaseData: Omit<CaseRecord, "id" | "createdAt" | "updatedAt" | "hearings" | "documents" | "evidence" | "stickyNotes">) => {
+  const addCase = (
+    newCaseData: Omit<CaseRecord, "id" | "createdAt" | "updatedAt" | "hearings" | "documents" | "evidence" | "stickyNotes"> & {
+      firstHearingDate?: string;
+      secondHearingDate?: string;
+    }
+  ) => {
     const nowId = Date.now();
-    const todayIso = new Date().toISOString().split("T")[0];
+    const todayIso = getLocalDateIso();
+    const { firstHearingDate, secondHearingDate, ...caseFields } = newCaseData;
+    const primaryHearingDate = firstHearingDate || caseFields.filingDate || todayIso;
     const newCase: CaseRecord = {
-      ...newCaseData,
+      ...caseFields,
       id: `case-${nowId}`,
-      filingDate: newCaseData.filingDate || todayIso,
-      courtRoomNumber: newCaseData.courtRoomNumber || newCaseData.courtName || "Court Room 1",
+      filingDate: caseFields.filingDate || todayIso,
+      courtRoomNumber: caseFields.courtRoomNumber || caseFields.courtName || "Court Room 1",
       hearings: [
         {
           id: `h-${nowId}`,
           caseId: `case-${nowId}`,
-          currentHearingDate: newCaseData.filingDate || todayIso,
+          currentHearingDate: primaryHearingDate,
+          nextHearingDate: secondHearingDate || "",
           hearingTime: "10:30 AM",
           judgeName: "Hon'ble Presiding Judge",
-          courtRoomNumber: newCaseData.courtRoomNumber || newCaseData.courtName || "Court Room 1",
+          courtRoomNumber: caseFields.courtRoomNumber || caseFields.courtName || "Court Room 1",
           purpose: "Initial Court Appearance & Notice",
           createdAt: new Date().toISOString(),
         },
@@ -655,6 +652,9 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const addHearingToCase = (caseId: string, hearing: Omit<HearingRecord, "id" | "caseId" | "createdAt">) => {
+    if (isCourtHoliday(hearing.currentHearingDate) || isCourtHoliday(hearing.nextHearingDate)) {
+      return;
+    }
     const updated = cases.map((c) => {
       if (c.id === caseId) {
         const newH: HearingRecord = {
@@ -677,6 +677,9 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const updateHearingInCase = (caseId: string, hearingId: string, updates: Partial<HearingRecord>) => {
+    if (isCourtHoliday(updates.currentHearingDate) || isCourtHoliday(updates.nextHearingDate)) {
+      return;
+    }
     const updated = cases.map((c) => {
       if (c.id === caseId) {
         const newHearings = c.hearings.map((h) => (h.id === hearingId ? { ...h, ...updates } : h));
@@ -1090,7 +1093,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       return `📌 AI Legal Executive Summary for ${caseRecord.caseTitle} (${caseRecord.caseNumber}):
 1. Core Issue: ${caseRecord.caseType} dispute in ${caseRecord.courtName} involving client ${caseRecord.clientName} against ${caseRecord.opponentName}.
-2. Current Status & Stage: Currently at ${caseRecord.currentStage} stage (${caseRecord.currentStatus}). Next hearing scheduled for ${caseRecord.hearings[0]?.nextHearingDate || "Pending"}.
+2. Current Status & Stage: Currently at ${caseRecord.currentStage} stage (${caseRecord.currentStatus}). Next hearing scheduled for ${formatDateDMY(caseRecord.hearings[0]?.nextHearingDate) || "Pending"}.
 3. Key Recommendation: Ensure certified copies of affidavits and witness statements are kept ready. High Priority Action item flagged.`;
     } catch (e) {
       return `Case Summary: ${caseRecord.caseTitle} - Stage: ${caseRecord.currentStage}. Priority: ${caseRecord.priority.toUpperCase()}.`;
@@ -1103,7 +1106,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (qLower.includes("next week") || qLower.includes("hearing")) {
       const upcoming = cases.filter((c) => c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate);
       return `⚖️ Found ${upcoming.length} upcoming court hearing(s) on your schedule:\n` +
-        upcoming.map((c) => `- ${c.caseTitle} (${c.caseNumber}) at ${c.courtName} on ${c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate}`).join("\n");
+        upcoming.map((c) => `- ${c.caseTitle} (${c.caseNumber}) at ${c.courtName} on ${formatDateDMY(c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate)}`).join("\n");
     }
 
     if (qLower.includes("pending") || qLower.includes("document")) {
@@ -1133,12 +1136,8 @@ Please check the specific case timeline tab for further document citations.`;
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Advocate_Sikandar_Khan_Backup_${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const fileName = `Advocate_Sikandar_Khan_Backup_${new Date().toISOString().split("T")[0]}.json`;
+    saveOrShareFileBlob(blob, fileName, "Chamber Workspace Backup");
     addAuditLog("BACKUP_EXPORTED", "Complete system database backup downloaded.");
   };
 

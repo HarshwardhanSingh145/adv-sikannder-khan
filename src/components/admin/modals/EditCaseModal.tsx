@@ -42,6 +42,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({ caseRecord, onSave
     clientMobile: caseRecord.clientMobile || "",
     caseTitle: caseRecord.caseTitle,
     caseNumber: caseRecord.caseNumber,
+    firNumber: caseRecord.firNumber || "",
     caseType: caseRecord.caseType.includes("Criminal") ? "Criminal" : "Civil",
     caseBackground: caseRecord.caseBackground || "None",
     courtName: caseRecord.courtName || "ACJM Makrana",
@@ -76,12 +77,14 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({ caseRecord, onSave
       clientName: formData.clientName,
       clientMobile: cleanMobile,
       caseNumber: formData.caseNumber,
+      firNumber: formData.firNumber.trim() || undefined,
       caseType: formData.caseType,
       caseBackground: formData.caseBackground,
       courtName: formData.courtName,
       act: formData.act,
       opponentName: formData.opponentName,
       currentStage: finalStage as CaseStage,
+      isCustomStage: formData.stageOption === "Custom",
       currentStatus: formData.currentStatus as CaseStatus,
       priority: formData.priority as CasePriority,
       caseTitle: `${formData.clientName} vs. ${formData.opponentName}`,
@@ -204,7 +207,17 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({ caseRecord, onSave
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[#0F172A] font-bold mb-1">FIR Number</label>
+              <input
+                type="text"
+                placeholder="e.g., FIR 142/2026"
+                value={formData.firNumber}
+                onChange={(e) => setFormData({ ...formData, firNumber: e.target.value })}
+                className="w-full bg-[#FFFFFF] border border-[#475569]/35 rounded-xl p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#0F172A]"
+              />
+            </div>
             <div>
               <label className="block text-[#0F172A] font-bold mb-1">Act / Section *</label>
               <input

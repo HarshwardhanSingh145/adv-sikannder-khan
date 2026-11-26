@@ -29,6 +29,7 @@ import {
   getTodaysHearingSummaryText,
   TodaysHearingItem,
 } from "../../lib/todaysHearingPdfGenerator";
+import { formatDateDMY, formatDateTimeDMY } from "../../lib/dateFormat";
 import { motion, AnimatePresence } from "motion/react";
 
 interface HearingPdfManagerTabProps {
@@ -60,19 +61,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
 
   const [selectedDate, setSelectedDate] = useState<string>(todayIso);
 
-  const selectedDateFormatted = (() => {
-    const parts = selectedDate.split("-").map(Number);
-    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
-      const d = new Date(parts[0], parts[1] - 1, parts[2]);
-      return d.toLocaleDateString("en-IN", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      });
-    }
-    return selectedDate;
-  })();
+  const selectedDateFormatted = formatDateDMY(selectedDate);
 
   const todayHearings = getTodaysHearingCases(cases, todayIso);
   const selectedDateHearings = getTodaysHearingCases(cases, selectedDate);
@@ -152,7 +141,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
   const handlePreviewArchiveItem = (item: HearingPdfMeta) => {
     const url = getTodaysHearingPdfBlobUrl(cases, item.date);
     setPreviewPdfUrl(url);
-    setPreviewTitle(`Archived Hearing PDF - ${item.date}`);
+    setPreviewTitle(`Archived Hearing PDF - ${formatDateDMY(item.date)}`);
   };
 
   const latestMeta = archive.find((a) => a.date === todayIso) || {
@@ -228,7 +217,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
             <CalendarCheck className="w-4 h-4 text-[#1D4ED8]" />
           </div>
           <p className="text-2xl font-serif font-extrabold text-[#0F172A]">{todayHearings.length}</p>
-          <p className="text-[11px] text-[#1D4ED8] font-semibold">{todayIso === selectedDate ? "Scheduled for Today" : `Today: ${todayIso}`}</p>
+          <p className="text-[11px] text-[#1D4ED8] font-semibold">{todayIso === selectedDate ? "Scheduled for Today" : `Today: ${formatDateDMY(todayIso)}`}</p>
         </div>
 
         {/* Metric 2 */}
@@ -240,7 +229,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
           <p className="text-lg font-serif font-bold text-[#0F172A]">
             {new Date(latestMeta.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <p className="text-[11px] text-[#1D4ED8] font-semibold">{new Date(latestMeta.generatedAt).toLocaleDateString()}</p>
+          <p className="text-[11px] text-[#1D4ED8] font-semibold">{formatDateDMY(latestMeta.generatedAt)}</p>
         </div>
 
         {/* Metric 3 */}
@@ -288,7 +277,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                   : "bg-white/80 text-[#1D4ED8] hover:bg-white border border-[#475569]/20"
               }`}
             >
-              Today ({todayIso})
+              Today ({formatDateDMY(todayIso)})
             </button>
 
             <button
@@ -299,7 +288,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                   : "bg-white/80 text-[#1D4ED8] hover:bg-white border border-[#475569]/20"
               }`}
             >
-              Tomorrow ({tomorrowIso})
+              Tomorrow ({formatDateDMY(tomorrowIso)})
             </button>
 
             <div className="flex items-center gap-1.5 bg-white/80 px-2 py-1 rounded-lg border border-[#475569]/20">
@@ -362,7 +351,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
         {caseCount === 0 ? (
           <div className="p-8 text-center bg-white/60 border border-dashed border-[#475569]/30 rounded-xl space-y-2">
             <AlertCircle className="w-8 h-8 text-[#475569] mx-auto opacity-70" />
-            <p className="text-sm font-bold text-[#0F172A]">No court hearings scheduled on {selectedDate}</p>
+            <p className="text-sm font-bold text-[#0F172A]">No court hearings scheduled on {formatDateDMY(selectedDate)}</p>
             <p className="text-xs text-[#1D4ED8] max-w-md mx-auto">
               You can still generate or download the PDF; it will include the official Chamber Notice certifying no appearances are listed for this date.
             </p>
@@ -465,7 +454,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                   <tr key={item.id} className="hover:bg-white/50 transition-colors">
                     <td className="py-3 px-4 font-bold text-[#0F172A]">
                       <div className="flex items-center gap-2">
-                        <span>{item.date}</span>
+                        <span>{formatDateDMY(item.date)}</span>
                         {isToday && (
                           <span className="px-2 py-0.5 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-[9px] font-black uppercase">
                             Today
@@ -474,7 +463,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                       </div>
                     </td>
                     <td className="py-3 px-4 font-mono text-[#1D4ED8]">
-                      {new Date(item.generatedAt).toLocaleString()}
+                      {formatDateTimeDMY(item.generatedAt)}
                     </td>
                     <td className="py-3 px-4 text-center font-extrabold text-[#0F172A]">
                       {item.totalCases}

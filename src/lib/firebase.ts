@@ -1,12 +1,25 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 
-// CRITICAL: Explicitly pass firestoreDatabaseId from firebaseConfig
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// CRITICAL: Explicitly pass firestoreDatabaseId from firebaseConfig and enable
+// experimentalAutoDetectLongPolling so Firestore works reliably in Capacitor iOS WKWebView (capacitor://)
+function createFirestoreInstance() {
+  try {
+    return initializeFirestore(
+      app,
+      { experimentalAutoDetectLongPolling: true },
+      firebaseConfig.firestoreDatabaseId
+    );
+  } catch {
+    return getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  }
+}
+
+export const db = createFirestoreInstance();
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

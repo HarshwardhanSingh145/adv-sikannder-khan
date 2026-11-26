@@ -50,19 +50,41 @@ button, a, input, select, textarea {
   }
 }
 
-/* Mobile app safe-area insets (iOS notch / Android navigation bar) */
+/* Mobile app safe-area insets (iOS notch / Dynamic Island / Home Indicator) */
 .safe-pt {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: max(env(safe-area-inset-top, 0px), 0px);
 }
 .safe-pb {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
 }
 html, body, #root {
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari / WKWebView auto-zoom on form focus */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: max(16px, 1em);
+    }
+  }
+}
+
+/* Native <dialog> modal scroll containment & backdrop */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 /* Hardware accelerated utility helpers */
