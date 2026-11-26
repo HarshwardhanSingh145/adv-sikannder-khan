@@ -48,6 +48,9 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
     return () => {
       clearTimeout(fallbackTimer);
       if (Capacitor.isNativePlatform()) {
+        if (Capacitor.getPlatform() === "android") {
+          StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+        }
         StatusBar.show().catch(() => {});
       }
     };
@@ -59,11 +62,12 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-[100] w-screen h-dvh bg-black overflow-hidden"
+      className="fixed inset-0 z-[100] w-screen h-dvh bg-[#F7F7F7] overflow-hidden"
     >
       <video
         ref={videoRef}
         src="./logo-intro.mp4"
+        poster="./logo-intro-poster.jpg"
         autoPlay
         muted
         playsInline
@@ -72,14 +76,6 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
         onError={finish}
         className="w-full h-full object-cover object-center block"
       />
-
-      <button
-        type="button"
-        onClick={finish}
-        className="fixed top-4 right-4 safe-pt px-4 py-1.5 rounded-full bg-black/55 hover:bg-black/80 text-white text-xs font-semibold backdrop-blur-md border border-white/20 transition-colors cursor-pointer"
-      >
-        Skip
-      </button>
     </motion.div>
   );
 };
