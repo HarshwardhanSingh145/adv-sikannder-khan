@@ -39,8 +39,8 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
       });
     }
 
-    // Safety fallback so splash never stalls (video is 5s)
-    const fallbackTimer = setTimeout(finish, 6500);
+    // Safety fallback so splash never stalls (video is 3s)
+    const fallbackTimer = setTimeout(finish, 4500);
     return () => {
       clearTimeout(fallbackTimer);
       if (Capacitor.isNativePlatform()) {
