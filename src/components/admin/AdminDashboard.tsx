@@ -915,20 +915,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setActiveCase(c);
                           setActiveTab("cases");
                         }}
-                        className="p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl flex items-center justify-between hover:border-[#475569]/35 transition-all cursor-pointer"
+                        className="p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:border-[#475569]/35 transition-all cursor-pointer"
                       >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#0F172A] text-xs">{c.caseTitle}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#475569]/15 text-[#0F172A] font-bold">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-bold text-[#0F172A] text-xs break-words">{c.caseTitle}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#475569]/15 text-[#0F172A] font-bold shrink-0">
                               {c.caseNumber}
                             </span>
                           </div>
-                          <p className="text-xs text-[#1D4ED8]">
+                          <p className="text-xs text-[#1D4ED8] break-words">
                             Client: <strong>{c.clientName}</strong> | Court: {c.courtName}
                           </p>
                         </div>
-                        <div className="text-right shrink-0">
+                        <div className="sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
                           <span className="text-xs font-bold text-[#1D4ED8] block">
                             {c.hearings[0]?.currentHearingDate || "Pending Schedule"}
                           </span>
@@ -997,23 +997,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {activeTab === "cases" && (
             <div className="space-y-6">
               {/* Header Bar & Search */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-64">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15 max-w-full overflow-hidden">
+                <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+                  <div className="relative w-full sm:w-64">
                     <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#475569]/80" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search title, client, court..."
-                      className="w-full bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#0F172A] outline-none focus:border-[#475569]/35"
+                      className="w-full bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg pl-8 pr-3 py-2 text-xs text-[#0F172A] outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
 
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg px-3 py-2 text-xs text-[#0F172A] outline-none"
+                    className="flex-1 sm:flex-none min-w-0 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg px-3 py-2 text-xs text-[#0F172A] outline-none"
                   >
                     <option value="All">All Statuses</option>
                     <option value="Active">Active</option>
@@ -1025,7 +1025,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <select
                     value={courtFilter}
                     onChange={(e) => setCourtFilter(e.target.value)}
-                    className="bg-white border border-[#475569]/35 rounded-lg px-3 py-2 text-xs text-[#0F172A] font-bold outline-none"
+                    className="flex-1 sm:flex-none min-w-0 max-w-full bg-white border border-[#475569]/35 rounded-lg px-3 py-2 text-xs text-[#0F172A] font-bold outline-none"
                   >
                     <option value="All">All Courts</option>
                     <option value="ACJM">ACJM Courts</option>

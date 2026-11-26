@@ -60,7 +60,8 @@ export default function App() {
 
 function MainLayout() {
   const { isLoggedIn } = useAdmin();
-  const [showIntro, setShowIntro] = useState(true);
+  // Show entry reveal video ONLY inside the native mobile app, not on the webpage
+  const [showIntro, setShowIntro] = useState(() => Capacitor.isNativePlatform());
 
   return (
     <div

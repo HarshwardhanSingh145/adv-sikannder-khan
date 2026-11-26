@@ -19,20 +19,20 @@ export const DownloadAppBanner: React.FC<DownloadAppBannerProps> = ({
   return (
     <section
       aria-label="Download Android Mobile App"
-      className={`w-full ${
+      className={`w-full max-w-full overflow-hidden ${
         compact ? "max-w-md mt-5" : "mt-8"
-      } bg-white/95 backdrop-blur-xl border border-[#1D4ED8]/20 rounded-3xl p-5 sm:p-6 shadow-[0_12px_36px_rgba(29,78,216,0.10)]`}
+      } bg-white/95 backdrop-blur-xl border border-[#1D4ED8]/20 rounded-3xl p-4 sm:p-6 shadow-[0_12px_36px_rgba(29,78,216,0.10)]`}
     >
       <div className={`flex ${compact ? "flex-col gap-4" : "flex-col sm:flex-row items-start sm:items-center justify-between gap-5"}`}>
-        <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0 w-full">
           <img
             src="./icons/icon-192.png"
             alt="Advocate Sikandar Khan App Icon"
-            className="w-14 h-14 rounded-2xl shadow-md border border-[#1D4ED8]/15 shrink-0 object-cover"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shadow-md border border-[#1D4ED8]/15 shrink-0 object-cover"
           />
-          <div className="min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A] truncate">
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h3 className="text-sm sm:text-base font-bold text-[#0F172A] break-words">
                 Adv. Sikandar Khan — Mobile App
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] border border-[#1D4ED8]/20 text-[10px] font-bold">

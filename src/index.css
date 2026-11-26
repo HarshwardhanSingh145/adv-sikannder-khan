@@ -57,9 +57,17 @@ button, a, input, select, textarea {
 .safe-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-html, body {
+html, body, #root {
+  max-width: 100%;
+  overflow-x: hidden;
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent SimpleBar content from overflowing horizontally on narrow screens */
+.simplebar-content {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Hardware accelerated utility helpers */

@@ -49,17 +49,18 @@ export function AdminAuthScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto p-4 min-h-dvh"
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden px-4 py-8 sm:py-10 min-h-dvh w-full"
     >
       <PremiumBackground />
 
-      {/* Login Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 32, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-        className="relative z-10 w-full max-w-md p-7 sm:p-10 bg-white/85 backdrop-blur-2xl border border-[#475569]/25 rounded-3xl shadow-[0_20px_50px_rgba(29,78,216,0.15)]"
-      >
+      <div className="relative z-10 min-h-full w-full flex flex-col items-center justify-center">
+        {/* Login Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 32, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          className="w-full max-w-md p-6 sm:p-9 bg-white/90 backdrop-blur-2xl border border-[#475569]/25 rounded-3xl shadow-[0_20px_50px_rgba(29,78,216,0.12)]"
+        >
         <div className="text-center mb-8">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
@@ -156,8 +157,9 @@ export function AdminAuthScreen() {
         </form>
       </motion.div>
 
-      <div className="relative z-10 w-full max-w-md">
-        <DownloadAppBanner compact />
+        <div className="w-full max-w-md">
+          <DownloadAppBanner compact />
+        </div>
       </div>
     </motion.main>
   );
