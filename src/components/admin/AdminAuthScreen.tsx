@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useAdmin } from "../../context/AdminContext";
 import { Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { PremiumBackground } from "./PremiumBackground";
+import { DownloadAppBanner } from "../DownloadAppBanner";
 
 export function AdminAuthScreen() {
   const { loginWithPin, failedPinAttempts, lockoutEndTime } = useAdmin();
@@ -48,7 +49,7 @@ export function AdminAuthScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 min-h-dvh"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto p-4 min-h-dvh"
     >
       <PremiumBackground />
 
@@ -57,14 +58,14 @@ export function AdminAuthScreen() {
         initial={{ opacity: 0, y: 32, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-        className="relative z-10 w-full max-w-md p-7 sm:p-10 bg-white/85 backdrop-blur-2xl border border-[#706C61]/25 rounded-3xl shadow-[0_20px_50px_rgba(82,71,56,0.15)]"
+        className="relative z-10 w-full max-w-md p-7 sm:p-10 bg-white/85 backdrop-blur-2xl border border-[#475569]/25 rounded-3xl shadow-[0_20px_50px_rgba(29,78,216,0.15)]"
       >
         <div className="text-center mb-8">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="text-3xl sm:text-4xl font-light tracking-tight text-[#221C16] mb-2"
+            className="text-3xl sm:text-4xl font-light tracking-tight text-[#0F172A] mb-2"
           >
             Welcome Back
           </motion.h1>
@@ -72,7 +73,7 @@ export function AdminAuthScreen() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.22 }}
-            className="text-lg sm:text-xl text-[#382F25] font-medium"
+            className="text-lg sm:text-xl text-[#1E40AF] font-medium"
           >
             Hello, Sikander Khan 👋
           </motion.h2>
@@ -80,7 +81,7 @@ export function AdminAuthScreen() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-[#706C61] font-semibold text-sm mt-1 mb-2"
+            className="text-[#475569] font-semibold text-sm mt-1 mb-2"
           >
             {greeting}
           </motion.p>
@@ -88,7 +89,7 @@ export function AdminAuthScreen() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="text-[#706C61]/80 text-sm"
+            className="text-[#475569]/80 text-sm"
           >
             Welcome back to your chamber workspace.
           </motion.p>
@@ -101,12 +102,12 @@ export function AdminAuthScreen() {
             transition={{ delay: 0.4 }}
             className="space-y-1.5"
           >
-            <label htmlFor="workspace-pin" className="block text-xs font-semibold text-[#524738] pl-1">
+            <label htmlFor="workspace-pin" className="block text-xs font-semibold text-[#1D4ED8] pl-1">
               Workspace Security PIN
             </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-[#706C61] group-focus-within:text-[#221C16] transition-colors" aria-hidden="true" />
+                <Lock className="h-5 w-5 text-[#475569] group-focus-within:text-[#0F172A] transition-colors" aria-hidden="true" />
               </div>
               <input
                 id="workspace-pin"
@@ -119,7 +120,7 @@ export function AdminAuthScreen() {
                 autoComplete="current-password"
                 aria-invalid={error ? "true" : undefined}
                 aria-describedby={error ? "workspace-pin-error" : undefined}
-                className="w-full bg-white border border-[#706C61]/30 rounded-2xl pl-12 pr-12 py-4 text-[#221C16] placeholder-[#706C61]/50 focus:outline-none focus:border-[#524738] focus:ring-2 focus:ring-[#524738]/15 transition-all duration-200 shadow-inner"
+                className="w-full bg-white border border-[#475569]/30 rounded-2xl pl-12 pr-12 py-4 text-[#0F172A] placeholder-[#475569]/50 focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/15 transition-all duration-200 shadow-inner"
                 placeholder="Enter your PIN (default: 0000)"
                 autoFocus
                 required
@@ -128,7 +129,7 @@ export function AdminAuthScreen() {
                 type="button"
                 onClick={() => setShowPin((prev) => !prev)}
                 aria-label={showPin ? "Hide PIN" : "Show PIN"}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#706C61] hover:text-[#221C16] transition-colors cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#475569] hover:text-[#0F172A] transition-colors cursor-pointer"
               >
                 {showPin ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
               </button>
@@ -147,13 +148,17 @@ export function AdminAuthScreen() {
             transition={{ delay: 0.48 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full relative group overflow-hidden rounded-2xl bg-[#524738] text-[#EFE9DC] font-medium py-4 flex items-center justify-center gap-2 shadow-lg shadow-[#524738]/20 hover:bg-[#382F25] cursor-pointer transition-colors"
+            className="w-full relative group overflow-hidden rounded-2xl bg-[#1D4ED8] text-[#EFF6FF] font-medium py-4 flex items-center justify-center gap-2 shadow-lg shadow-[#1D4ED8]/20 hover:bg-[#1E40AF] cursor-pointer transition-colors"
           >
             <span className="relative z-10">Access Workspace</span>
             <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
           </motion.button>
         </form>
       </motion.div>
+
+      <div className="relative z-10 w-full max-w-md">
+        <DownloadAppBanner compact />
+      </div>
     </motion.main>
   );
 }

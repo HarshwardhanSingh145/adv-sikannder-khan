@@ -148,10 +148,10 @@ export function buildTodaysHearingPdfDoc(
   const pageHeight = doc.internal.pageSize.getHeight(); // 297mm
 
   // Professional Earthy Legal Theme Palette
-  const earthyBrown = [82, 71, 56]; // #524738 primary chamber brand
-  const deepBrown = [34, 28, 22]; // #221C16 dark text
+  const earthyBrown = [82, 71, 56]; // #1D4ED8 primary chamber brand
+  const deepBrown = [34, 28, 22]; // #0F172A dark text
   const creamBg = [245, 240, 230]; // #F5F0E6
-  const borderBrown = [112, 108, 97]; // #706C61
+  const borderBrown = [112, 108, 97]; // #475569
   const goldAccent = [184, 134, 11]; // Golden accent
 
   // Top Decorative Header Banner

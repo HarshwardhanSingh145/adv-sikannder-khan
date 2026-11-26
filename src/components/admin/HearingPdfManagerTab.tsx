@@ -167,16 +167,16 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-[#E2DDD0]/90 border-2 border-[#706C61]/25 rounded-2xl p-6 sm:p-8 shadow-md shadow-[#524738]/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="bg-[#FFFFFF]/90 border-2 border-[#475569]/25 rounded-2xl p-6 sm:p-8 shadow-md shadow-[#1D4ED8]/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#524738] text-[#EFE9DC] text-[11px] font-bold uppercase tracking-wider">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#EFE9DC]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-[11px] font-bold uppercase tracking-wider">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#EFF6FF]" />
             <span>Automated Daily Engine • Active</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#221C16]">
+          <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#0F172A]">
             Today's Hearing PDF Generator
           </h2>
-          <p className="text-xs sm:text-sm text-[#524738] font-medium max-w-xl">
+          <p className="text-xs sm:text-sm text-[#1D4ED8] font-medium max-w-xl">
             Official chamber daily cause list PDF generator for Advocate Sikandar Khan. Runs automatically every midnight at 12:00 AM IST and generates verified cause lists.
           </p>
         </div>
@@ -184,36 +184,36 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             onClick={handlePreviewSelected}
-            className="px-4 py-2.5 bg-[#524738]/10 hover:bg-[#524738]/20 border border-[#524738]/30 text-[#221C16] font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+            className="px-4 py-2.5 bg-[#1D4ED8]/10 hover:bg-[#1D4ED8]/20 border border-[#1D4ED8]/30 text-[#0F172A] font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-xs"
           >
-            <Eye className="w-4 h-4 text-[#524738]" />
+            <Eye className="w-4 h-4 text-[#1D4ED8]" />
             <span>Preview PDF</span>
           </button>
 
           <button
             onClick={handleDownloadSelected}
-            className="px-5 py-2.5 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold text-xs rounded-xl shadow-md shadow-[#524738]/20 transition-all flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold text-xs rounded-xl shadow-md shadow-[#1D4ED8]/20 transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Download className="w-4 h-4 text-[#EFE9DC]" />
+            <Download className="w-4 h-4 text-[#EFF6FF]" />
             <span>Download Today's PDF</span>
           </button>
 
           <button
             onClick={handlePrintSelected}
-            className="px-3.5 py-2.5 bg-[#E2DDD0] hover:bg-[#D8D2C2] border border-[#706C61]/30 text-[#221C16] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="px-3.5 py-2.5 bg-[#FFFFFF] hover:bg-[#D8D2C2] border border-[#475569]/30 text-[#0F172A] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
             title="Print PDF"
           >
-            <Printer className="w-4 h-4 text-[#524738]" />
+            <Printer className="w-4 h-4 text-[#1D4ED8]" />
             <span className="hidden sm:inline">Print</span>
           </button>
 
           <button
             onClick={handleManualRegenerate}
             disabled={isRegenerating}
-            className="px-3.5 py-2.5 bg-[#E2DDD0] hover:bg-[#D8D2C2] border border-[#706C61]/30 text-[#221C16] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+            className="px-3.5 py-2.5 bg-[#FFFFFF] hover:bg-[#D8D2C2] border border-[#475569]/30 text-[#0F172A] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
             title="Refresh database records"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#524738] ${isRegenerating ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#1D4ED8] ${isRegenerating ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
@@ -222,40 +222,40 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
       {/* Real-Time Engine Status Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1 */}
-        <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-[#706C61]">
+        <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-[#475569]">
             <span>Today's Appearances</span>
-            <CalendarCheck className="w-4 h-4 text-[#524738]" />
+            <CalendarCheck className="w-4 h-4 text-[#1D4ED8]" />
           </div>
-          <p className="text-2xl font-serif font-extrabold text-[#221C16]">{todayHearings.length}</p>
-          <p className="text-[11px] text-[#524738] font-semibold">{todayIso === selectedDate ? "Scheduled for Today" : `Today: ${todayIso}`}</p>
+          <p className="text-2xl font-serif font-extrabold text-[#0F172A]">{todayHearings.length}</p>
+          <p className="text-[11px] text-[#1D4ED8] font-semibold">{todayIso === selectedDate ? "Scheduled for Today" : `Today: ${todayIso}`}</p>
         </div>
 
         {/* Metric 2 */}
-        <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-[#706C61]">
+        <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-[#475569]">
             <span>Last Sync & Generation</span>
-            <Clock className="w-4 h-4 text-[#524738]" />
+            <Clock className="w-4 h-4 text-[#1D4ED8]" />
           </div>
-          <p className="text-lg font-serif font-bold text-[#221C16]">
+          <p className="text-lg font-serif font-bold text-[#0F172A]">
             {new Date(latestMeta.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <p className="text-[11px] text-[#524738] font-semibold">{new Date(latestMeta.generatedAt).toLocaleDateString()}</p>
+          <p className="text-[11px] text-[#1D4ED8] font-semibold">{new Date(latestMeta.generatedAt).toLocaleDateString()}</p>
         </div>
 
         {/* Metric 3 */}
-        <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-[#706C61]">
+        <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-[#475569]">
             <span>Midnight Auto-Run</span>
-            <Calendar className="w-4 h-4 text-[#524738]" />
+            <Calendar className="w-4 h-4 text-[#1D4ED8]" />
           </div>
-          <p className="text-lg font-serif font-bold text-[#221C16]">12:00 AM IST</p>
-          <p className="text-[11px] text-[#524738] font-semibold">Every Night Scheduled</p>
+          <p className="text-lg font-serif font-bold text-[#0F172A]">12:00 AM IST</p>
+          <p className="text-[11px] text-[#1D4ED8] font-semibold">Every Night Scheduled</p>
         </div>
 
         {/* Metric 4 */}
-        <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-[#706C61]">
+        <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-5 shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-[#475569]">
             <span>PDF Engine Status</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-700" />
           </div>
@@ -263,18 +263,18 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
             <span>Ready & Operational</span>
           </div>
-          <p className="text-[11px] font-semibold text-[#524738]">Official Chamber Letterhead</p>
+          <p className="text-[11px] font-semibold text-[#1D4ED8]">Official Chamber Letterhead</p>
         </div>
       </div>
 
       {/* Date Selector & Action Strip */}
-      <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-5 shadow-xs space-y-4">
+      <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-serif font-bold text-[#221C16]">
+            <h3 className="text-base font-serif font-bold text-[#0F172A]">
               Select Cause List Date
             </h3>
-            <p className="text-xs text-[#524738]">
+            <p className="text-xs text-[#1D4ED8]">
               Generate or download the official hearing list for today, tomorrow, or any specific court date.
             </p>
           </div>
@@ -284,8 +284,8 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
               onClick={() => setSelectedDate(todayIso)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedDate === todayIso
-                  ? "bg-[#524738] text-[#EFE9DC] shadow-xs"
-                  : "bg-white/80 text-[#524738] hover:bg-white border border-[#706C61]/20"
+                  ? "bg-[#1D4ED8] text-[#EFF6FF] shadow-xs"
+                  : "bg-white/80 text-[#1D4ED8] hover:bg-white border border-[#475569]/20"
               }`}
             >
               Today ({todayIso})
@@ -295,22 +295,22 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
               onClick={() => setSelectedDate(tomorrowIso)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedDate === tomorrowIso
-                  ? "bg-[#524738] text-[#EFE9DC] shadow-xs"
-                  : "bg-white/80 text-[#524738] hover:bg-white border border-[#706C61]/20"
+                  ? "bg-[#1D4ED8] text-[#EFF6FF] shadow-xs"
+                  : "bg-white/80 text-[#1D4ED8] hover:bg-white border border-[#475569]/20"
               }`}
             >
               Tomorrow ({tomorrowIso})
             </button>
 
-            <div className="flex items-center gap-1.5 bg-white/80 px-2 py-1 rounded-lg border border-[#706C61]/20">
-              <span className="text-[11px] font-semibold text-[#524738]">Date:</span>
+            <div className="flex items-center gap-1.5 bg-white/80 px-2 py-1 rounded-lg border border-[#475569]/20">
+              <span className="text-[11px] font-semibold text-[#1D4ED8]">Date:</span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => {
                   if (e.target.value) setSelectedDate(e.target.value);
                 }}
-                className="text-xs font-bold text-[#221C16] bg-transparent outline-none cursor-pointer"
+                className="text-xs font-bold text-[#0F172A] bg-transparent outline-none cursor-pointer"
               />
             </div>
 
@@ -327,15 +327,15 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
       </div>
 
       {/* Cases Included in this PDF */}
-      <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#706C61]/20 pb-4">
+      <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#475569]/20 pb-4">
           <div className="flex items-center gap-2.5">
-            <FileText className="w-5 h-5 text-[#524738]" />
+            <FileText className="w-5 h-5 text-[#1D4ED8]" />
             <div>
-              <h3 className="text-lg font-serif font-extrabold text-[#221C16]">
+              <h3 className="text-lg font-serif font-extrabold text-[#0F172A]">
                 Hearings in PDF for {selectedDateFormatted}
               </h3>
-              <p className="text-xs text-[#524738] font-medium">
+              <p className="text-xs text-[#1D4ED8] font-medium">
                 {caseCount} hearing case(s) found in Chamber records for this date
               </p>
             </div>
@@ -344,14 +344,14 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePreviewSelected}
-              className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-[#221C16] border border-[#706C61]/30 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-[#0F172A] border border-[#475569]/30 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <Eye className="w-3.5 h-3.5 text-[#524738]" />
+              <Eye className="w-3.5 h-3.5 text-[#1D4ED8]" />
               <span>View PDF</span>
             </button>
             <button
               onClick={handleDownloadSelected}
-              className="px-3.5 py-1.5 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3.5 py-1.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download PDF</span>
@@ -360,10 +360,10 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
         </div>
 
         {caseCount === 0 ? (
-          <div className="p-8 text-center bg-white/60 border border-dashed border-[#706C61]/30 rounded-xl space-y-2">
-            <AlertCircle className="w-8 h-8 text-[#706C61] mx-auto opacity-70" />
-            <p className="text-sm font-bold text-[#221C16]">No court hearings scheduled on {selectedDate}</p>
-            <p className="text-xs text-[#524738] max-w-md mx-auto">
+          <div className="p-8 text-center bg-white/60 border border-dashed border-[#475569]/30 rounded-xl space-y-2">
+            <AlertCircle className="w-8 h-8 text-[#475569] mx-auto opacity-70" />
+            <p className="text-sm font-bold text-[#0F172A]">No court hearings scheduled on {selectedDate}</p>
+            <p className="text-xs text-[#1D4ED8] max-w-md mx-auto">
               You can still generate or download the PDF; it will include the official Chamber Notice certifying no appearances are listed for this date.
             </p>
           </div>
@@ -371,7 +371,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b-2 border-[#706C61]/25 bg-white/70 text-[#221C16]">
+                <tr className="border-b-2 border-[#475569]/25 bg-white/70 text-[#0F172A]">
                   <th className="py-2.5 px-3 font-extrabold text-center w-12">S.No.</th>
                   <th className="py-2.5 px-3 font-extrabold w-36">Case Number</th>
                   <th className="py-2.5 px-3 font-extrabold">Parties & Client</th>
@@ -381,33 +381,33 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                   <th className="py-2.5 px-3 font-extrabold text-right w-20">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#706C61]/15 text-[#221C16]">
+              <tbody className="divide-y divide-[#475569]/15 text-[#0F172A]">
                 {selectedDateHearings.map((item: TodaysHearingItem, index: number) => {
                   const c = item.caseRecord;
                   return (
                     <tr key={c.id || index} className="hover:bg-white/60 transition-colors">
-                      <td className="py-3 px-3 text-center font-bold text-[#524738]">
+                      <td className="py-3 px-3 text-center font-bold text-[#1D4ED8]">
                         {index + 1}
                       </td>
-                      <td className="py-3 px-3 font-mono font-bold text-[#221C16]">
+                      <td className="py-3 px-3 font-mono font-bold text-[#0F172A]">
                         {c.caseNumber}
                       </td>
                       <td className="py-3 px-3 font-semibold">
-                        <div className="text-[#221C16] font-bold">{c.caseTitle}</div>
-                        <div className="text-[11px] text-[#524738]">
-                          Client: <span className="font-semibold text-[#221C16]">{c.clientName}</span>
+                        <div className="text-[#0F172A] font-bold">{c.caseTitle}</div>
+                        <div className="text-[11px] text-[#1D4ED8]">
+                          Client: <span className="font-semibold text-[#0F172A]">{c.clientName}</span>
                           {c.opponentName && <span> vs. {c.opponentName}</span>}
                         </div>
                       </td>
                       <td className="py-3 px-3">
-                        <div className="font-semibold text-[#221C16]">{c.courtName || "Makrana Court"}</div>
-                        <div className="text-[10.5px] text-[#524738]">{item.courtRoom}</div>
+                        <div className="font-semibold text-[#0F172A]">{c.courtName || "Makrana Court"}</div>
+                        <div className="text-[10.5px] text-[#1D4ED8]">{item.courtRoom}</div>
                       </td>
-                      <td className="py-3 px-3 text-center font-semibold text-[#221C16]">
+                      <td className="py-3 px-3 text-center font-semibold text-[#0F172A]">
                         {item.hearingTime}
                       </td>
-                      <td className="py-3 px-3 font-medium text-[#524738]">
-                        <span className="px-2 py-0.5 rounded-full bg-white border border-[#706C61]/25 text-[10px] font-bold text-[#221C16]">
+                      <td className="py-3 px-3 font-medium text-[#1D4ED8]">
+                        <span className="px-2 py-0.5 rounded-full bg-white border border-[#475569]/25 text-[10px] font-bold text-[#0F172A]">
                           {item.purpose}
                         </span>
                       </td>
@@ -417,7 +417,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                             setActiveCase(c);
                             setActiveTab("cases");
                           }}
-                          className="p-1 hover:bg-[#524738]/10 text-[#524738] rounded-md transition-colors cursor-pointer inline-flex items-center gap-1 text-[11px] font-semibold"
+                          className="p-1 hover:bg-[#1D4ED8]/10 text-[#1D4ED8] rounded-md transition-colors cursor-pointer inline-flex items-center gap-1 text-[11px] font-semibold"
                           title="View Case File"
                         >
                           <span>Open</span>
@@ -434,15 +434,15 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
       </div>
 
       {/* PDF Archive Table */}
-      <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-6 shadow-xs space-y-5">
-        <div className="flex items-center justify-between border-b border-[#706C61]/20 pb-3">
+      <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-6 shadow-xs space-y-5">
+        <div className="flex items-center justify-between border-b border-[#475569]/20 pb-3">
           <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-[#524738]" />
-            <h3 className="text-lg font-serif font-extrabold text-[#221C16]">
+            <History className="w-5 h-5 text-[#1D4ED8]" />
+            <h3 className="text-lg font-serif font-extrabold text-[#0F172A]">
               Previous Daily Hearing List Archive
             </h3>
           </div>
-          <span className="text-xs font-bold text-[#524738]">
+          <span className="text-xs font-bold text-[#1D4ED8]">
             Total In Archive: {archive.length}
           </span>
         </div>
@@ -450,7 +450,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b-2 border-[#706C61]/25 bg-white/70 text-[#221C16]">
+              <tr className="border-b-2 border-[#475569]/25 bg-white/70 text-[#0F172A]">
                 <th className="py-2.5 px-4 font-extrabold">Date</th>
                 <th className="py-2.5 px-4 font-extrabold">Generated Timestamp</th>
                 <th className="py-2.5 px-4 font-extrabold text-center">Cases</th>
@@ -458,25 +458,25 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                 <th className="py-2.5 px-4 font-extrabold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#706C61]/15">
+            <tbody className="divide-y divide-[#475569]/15">
               {archive.map((item) => {
                 const isToday = item.date === todayIso;
                 return (
                   <tr key={item.id} className="hover:bg-white/50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-[#221C16]">
+                    <td className="py-3 px-4 font-bold text-[#0F172A]">
                       <div className="flex items-center gap-2">
                         <span>{item.date}</span>
                         {isToday && (
-                          <span className="px-2 py-0.5 rounded-full bg-[#524738] text-[#EFE9DC] text-[9px] font-black uppercase">
+                          <span className="px-2 py-0.5 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-[9px] font-black uppercase">
                             Today
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-[#524738]">
+                    <td className="py-3 px-4 font-mono text-[#1D4ED8]">
                       {new Date(item.generatedAt).toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 text-center font-extrabold text-[#221C16]">
+                    <td className="py-3 px-4 text-center font-extrabold text-[#0F172A]">
                       {item.totalCases}
                     </td>
                     <td className="py-3 px-4">
@@ -494,14 +494,14 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                       <div className="inline-flex items-center gap-2">
                         <button
                           onClick={() => handlePreviewArchiveItem(item)}
-                          className="px-2.5 py-1.5 bg-white border border-[#706C61]/25 text-[#221C16] hover:bg-neutral-100 font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 text-[11px]"
+                          className="px-2.5 py-1.5 bg-white border border-[#475569]/25 text-[#0F172A] hover:bg-neutral-100 font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 text-[11px]"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>View</span>
                         </button>
                         <button
                           onClick={() => handleDownloadArchiveItem(item)}
-                          className="px-3 py-1.5 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 text-[11px]"
+                          className="px-3 py-1.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 text-[11px]"
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download</span>
@@ -529,11 +529,11 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#EFE9DC] border-2 border-[#706C61]/35 rounded-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden shadow-2xl relative"
+              className="bg-[#EFF6FF] border-2 border-[#475569]/35 rounded-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden shadow-2xl relative"
             >
-              <div className="bg-[#524738] text-[#EFE9DC] px-5 py-3.5 flex items-center justify-between">
+              <div className="bg-[#1D4ED8] text-[#EFF6FF] px-5 py-3.5 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <FileText className="w-5 h-5 text-[#EFE9DC]" />
+                  <FileText className="w-5 h-5 text-[#EFF6FF]" />
                   <h3 className="font-serif font-bold text-sm sm:text-base leading-tight">
                     {previewTitle || "Hearing List PDF Preview"}
                   </h3>
@@ -545,7 +545,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                       downloadTodaysHearingPdf(cases, selectedDate);
                       showToast("PDF downloaded from preview!");
                     }}
-                    className="px-3 py-1 bg-[#EFE9DC] text-[#221C16] hover:bg-[#E2DDD0] font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-3 py-1 bg-[#EFF6FF] text-[#0F172A] hover:bg-[#FFFFFF] font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download</span>
@@ -556,7 +556,7 @@ export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
                       URL.revokeObjectURL(previewPdfUrl);
                       setPreviewPdfUrl(null);
                     }}
-                    className="p-1 hover:bg-white/10 rounded-lg text-[#EFE9DC] transition-colors cursor-pointer"
+                    className="p-1 hover:bg-white/10 rounded-lg text-[#EFF6FF] transition-colors cursor-pointer"
                     title="Close Preview"
                   >
                     <X className="w-5 h-5" />

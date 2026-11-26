@@ -34,28 +34,28 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#EFE9DC] border-2 border-[#706C61]/35 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl relative text-[#221C16]">
+      <div className="bg-[#EFF6FF] border-2 border-[#475569]/35 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl relative text-[#0F172A]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#706C61]/25 pb-4">
+        <div className="flex items-center justify-between border-b border-[#475569]/25 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#524738] flex items-center justify-center shadow-md shadow-[#524738]/15">
-              <CalendarIcon className="w-5 h-5 text-[#EFE9DC]" />
+            <div className="w-9 h-9 rounded-full bg-[#1D4ED8] flex items-center justify-center shadow-md shadow-[#1D4ED8]/15">
+              <CalendarIcon className="w-5 h-5 text-[#EFF6FF]" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-serif text-[#221C16]">Court Schedule: {dateStr}</h3>
-              <p className="text-[11px] text-[#524738] font-semibold">{casesForDate.length} Cause List Appearance(s)</p>
+              <h3 className="text-sm font-bold font-serif text-[#0F172A]">Court Schedule: {dateStr}</h3>
+              <p className="text-[11px] text-[#1D4ED8] font-semibold">{casesForDate.length} Cause List Appearance(s)</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => downloadTodaysHearingPdf(casesForDate, dateStr)}
-              className="px-3 py-1.5 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              className="px-3 py-1.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
               title="Download Cause List PDF for this date"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download PDF</span>
             </button>
-            <button onClick={onClose} className="p-1.5 rounded-lg text-[#706C61] hover:text-[#221C16] hover:bg-black/5 cursor-pointer">
+            <button onClick={onClose} className="p-1.5 rounded-lg text-[#475569] hover:text-[#0F172A] hover:bg-black/5 cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -63,7 +63,7 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
 
         {/* List of cases scheduled for this date */}
         {casesForDate.length === 0 ? (
-          <div className="p-8 text-center bg-white/60 rounded-xl border border-[#706C61]/20 text-xs text-[#524738] font-semibold">
+          <div className="p-8 text-center bg-white/60 rounded-xl border border-[#475569]/20 text-xs text-[#1D4ED8] font-semibold">
             No court hearings scheduled for {dateStr}.
           </div>
         ) : (
@@ -76,17 +76,17 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
               const isReschedulingThis = rescheduleCaseId === c.id && rescheduleHearingId === hearing?.id;
 
               return (
-                <div key={c.id} className="p-4 bg-white/70 border border-[#706C61]/25 rounded-xl space-y-3 relative text-xs">
+                <div key={c.id} className="p-4 bg-white/70 border border-[#475569]/25 rounded-xl space-y-3 relative text-xs">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-[#221C16]">{c.caseNumber}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#706C61]/15 text-[#221C16] border border-[#706C61]/25 font-bold">
+                        <span className="font-extrabold text-[#0F172A]">{c.caseNumber}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#475569]/15 text-[#0F172A] border border-[#475569]/25 font-bold">
                           {c.currentStage}
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-[#221C16] mt-1">{c.caseTitle}</h4>
-                      <p className="text-[11px] text-[#524738] font-medium">Client: <strong>{c.clientName}</strong> vs. {c.opponentName}</p>
+                      <h4 className="text-sm font-bold text-[#0F172A] mt-1">{c.caseTitle}</h4>
+                      <p className="text-[11px] text-[#1D4ED8] font-medium">Client: <strong>{c.clientName}</strong> vs. {c.opponentName}</p>
                     </div>
 
                     <button
@@ -94,49 +94,49 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
                         onOpenCaseTimeline(c);
                         onClose();
                       }}
-                      className="px-3 py-1 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold rounded-lg text-[11px] flex items-center gap-1 transition-all shrink-0 shadow-xs cursor-pointer"
+                      className="px-3 py-1 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded-lg text-[11px] flex items-center gap-1 transition-all shrink-0 shadow-xs cursor-pointer"
                     >
                       View Timeline <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
-                  <div className="p-3 bg-[#E2DDD0]/60 border border-[#706C61]/20 rounded-lg space-y-1 text-[#221C16] font-medium">
-                    <p className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#524738]" /> {c.courtName} ({c.courtRoomNumber})</p>
-                    <p className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#524738]" /> Time: {hearing?.hearingTime} | Judge: {hearing?.judgeName}</p>
-                    <p className="text-[#221C16]"><strong>Purpose:</strong> {hearing?.purpose}</p>
+                  <div className="p-3 bg-[#FFFFFF]/60 border border-[#475569]/20 rounded-lg space-y-1 text-[#0F172A] font-medium">
+                    <p className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#1D4ED8]" /> {c.courtName} ({c.courtRoomNumber})</p>
+                    <p className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#1D4ED8]" /> Time: {hearing?.hearingTime} | Judge: {hearing?.judgeName}</p>
+                    <p className="text-[#0F172A]"><strong>Purpose:</strong> {hearing?.purpose}</p>
                     {hearing?.result && <p className="text-emerald-700 font-bold"><strong>Result:</strong> {hearing.result}</p>}
                   </div>
 
                   {isReschedulingThis ? (
-                    <form onSubmit={handleRescheduleSubmit} className="p-3 bg-white border border-[#706C61]/35 rounded-lg space-y-2">
-                      <h5 className="text-[11px] font-bold text-[#221C16]">Reschedule Hearing Date</h5>
+                    <form onSubmit={handleRescheduleSubmit} className="p-3 bg-white border border-[#475569]/35 rounded-lg space-y-2">
+                      <h5 className="text-[11px] font-bold text-[#0F172A]">Reschedule Hearing Date</h5>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-[10px] font-semibold text-[#524738]">New Hearing Date</label>
+                          <label className="block text-[10px] font-semibold text-[#1D4ED8]">New Hearing Date</label>
                           <input
                             type="date"
                             required
                             value={newDateInput}
                             onChange={(e) => setNewDateInput(e.target.value)}
-                            className="w-full bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded p-1.5 text-[#221C16] font-semibold"
+                            className="w-full bg-[#FFFFFF]/80 border border-[#475569]/25 rounded p-1.5 text-[#0F172A] font-semibold"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-[#524738]">Reason / Notes</label>
+                          <label className="block text-[10px] font-semibold text-[#1D4ED8]">Reason / Notes</label>
                           <input
                             type="text"
                             value={newNotesInput}
                             onChange={(e) => setNewNotesInput(e.target.value)}
                             placeholder="Adjournment granted"
-                            className="w-full bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded p-1.5 text-[#221C16] font-semibold"
+                            className="w-full bg-[#FFFFFF]/80 border border-[#475569]/25 rounded p-1.5 text-[#0F172A] font-semibold"
                           />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2 pt-1">
-                        <button type="button" onClick={() => setRescheduleCaseId(null)} className="px-3 py-1 border border-[#706C61]/25 rounded text-[#221C16] text-[10px] font-semibold cursor-pointer">
+                        <button type="button" onClick={() => setRescheduleCaseId(null)} className="px-3 py-1 border border-[#475569]/25 rounded text-[#0F172A] text-[10px] font-semibold cursor-pointer">
                           Cancel
                         </button>
-                        <button type="submit" className="px-3 py-1 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold rounded text-[10px] cursor-pointer">
+                        <button type="submit" className="px-3 py-1 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold rounded text-[10px] cursor-pointer">
                           Save Reschedule
                         </button>
                       </div>
@@ -152,7 +152,7 @@ export const CalendarHearingModal: React.FC<CalendarHearingModalProps> = ({
                             setNewDateInput(hearing.nextHearingDate || hearing.currentHearingDate || dateStr);
                           }
                         }}
-                        className="text-[11px] text-[#524738] hover:text-[#221C16] flex items-center gap-1 font-bold cursor-pointer"
+                        className="text-[11px] text-[#1D4ED8] hover:text-[#0F172A] flex items-center gap-1 font-bold cursor-pointer"
                       >
                         <Edit3 className="w-3 h-3" /> Reschedule / Edit Hearing
                       </button>

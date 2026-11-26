@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AdminProvider, useAdmin } from "./context/AdminContext";
 import { AdminAuthScreen } from "./components/admin/AdminAuthScreen";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
+import { SplashIntroVideo } from "./components/SplashIntroVideo";
 import { AnimatePresence, MotionConfig } from "motion/react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
@@ -19,7 +20,7 @@ export default function App() {
     // Configure native mobile status bar & splash screen when running in Capacitor
     if (Capacitor.isNativePlatform()) {
       StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-      StatusBar.setBackgroundColor({ color: "#524738" }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: "#1D4ED8" }).catch(() => {});
       SplashScreen.hide().catch(() => {});
     }
 
@@ -59,14 +60,17 @@ export default function App() {
 
 function MainLayout() {
   const { isLoggedIn } = useAdmin();
+  const [showIntro, setShowIntro] = useState(true);
 
   return (
     <div
-      className="min-h-screen text-[#382F25] font-sans relative overflow-x-hidden selection:bg-[#706C61]/20 selection:text-[#221C16]"
+      className="min-h-screen text-[#1E40AF] font-sans relative overflow-x-hidden selection:bg-[#475569]/20 selection:text-[#0F172A]"
       id="app-root"
     >
       <AnimatePresence mode="wait">
-        {!isLoggedIn ? (
+        {showIntro ? (
+          <SplashIntroVideo key="intro" onComplete={() => setShowIntro(false)} />
+        ) : !isLoggedIn ? (
           <AdminAuthScreen key="auth" />
         ) : (
           <AdminDashboard key="dashboard" onClose={() => {}} />

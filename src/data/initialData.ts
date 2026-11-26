@@ -861,7 +861,7 @@ export const INITIAL_CASES: CaseRecord[] = [
             id: "ann-1",
             type: "stamp",
             stampText: "⭐ Urgent",
-            color: "#EFE9DC",
+            color: "#EFF6FF",
             strokeWidth: 3,
             position: { x: 50, y: 80 },
           },

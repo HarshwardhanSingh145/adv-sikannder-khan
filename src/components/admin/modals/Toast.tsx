@@ -23,14 +23,14 @@ export const Toast: React.FC<ToastProps> = ({ message, type = "success", onClose
             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
             : type === "error"
             ? "bg-red-50 border-red-500/20 text-red-400"
-            : "bg-[#E2DDD0]/80 border-[#706C61]/35 text-[#221C16]"
+            : "bg-[#FFFFFF]/80 border-[#475569]/35 text-[#0F172A]"
         }`}
       >
         {type === "success" && <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />}
         {type === "error" && <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />}
-        {type === "info" && <Info className="w-5 h-5 text-[#221C16] shrink-0" />}
+        {type === "info" && <Info className="w-5 h-5 text-[#0F172A] shrink-0" />}
         <span>{message}</span>
-        <button onClick={onClose} className="p-1 text-[#706C61] hover:text-[#221C16] ml-2">
+        <button onClick={onClose} className="p-1 text-[#475569] hover:text-[#0F172A] ml-2">
           <X className="w-4 h-4" />
         </button>
       </div>

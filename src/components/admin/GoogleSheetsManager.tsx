@@ -282,19 +282,19 @@ export const GoogleSheetsManager: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl text-[#221C16] space-y-6 shadow-lg shadow-black/50">
+    <div className="p-6 md:p-8 bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl text-[#0F172A] space-y-6 shadow-lg shadow-black/50">
       
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#706C61]/20 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#475569]/20 pb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-xl">
-            <FileSpreadsheet className="w-8 h-8 text-[#221C16]" />
+          <div className="p-3 bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-xl">
+            <FileSpreadsheet className="w-8 h-8 text-[#0F172A]" />
           </div>
           <div>
-            <h3 className="font-serif text-xl md:text-2xl font-bold text-[#221C16]">
+            <h3 className="font-serif text-xl md:text-2xl font-bold text-[#0F172A]">
               Google Sheets Synchronization
             </h3>
-            <p className="text-xs text-[#706C61] font-sans mt-0.5">
+            <p className="text-xs text-[#475569] font-sans mt-0.5">
               Connect your Google Workspace account to read, write, and backup law firm data directly in Google Sheets.
             </p>
           </div>
@@ -303,17 +303,17 @@ export const GoogleSheetsManager: React.FC = () => {
         {/* Auth status & Sign-In button */}
         <div>
           {user ? (
-            <div className="flex items-center gap-3 bg-[#E2DDD0]/80 border border-[#706C61]/25 px-4 py-2 rounded-xl">
-              <div className="w-8 h-8 rounded-full bg-[#EFE9DC] text-black flex items-center justify-center font-bold text-sm">
+            <div className="flex items-center gap-3 bg-[#FFFFFF]/80 border border-[#475569]/25 px-4 py-2 rounded-xl">
+              <div className="w-8 h-8 rounded-full bg-[#EFF6FF] text-black flex items-center justify-center font-bold text-sm">
                 {user.displayName ? user.displayName.charAt(0) : "U"}
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-xs font-bold text-[#221C16]">{user.displayName || "Google User"}</span>
-                <span className="text-[10px] text-[#706C61]">{user.email}</span>
+                <span className="text-xs font-bold text-[#0F172A]">{user.displayName || "Google User"}</span>
+                <span className="text-[10px] text-[#475569]">{user.email}</span>
               </div>
               <button
                 onClick={handleGoogleLogout}
-                className="ml-2 text-[#706C61] hover:text-[#221C16] transition-colors p-1"
+                className="ml-2 text-[#475569] hover:text-[#0F172A] transition-colors p-1"
                 title="Sign out of Google"
               >
                 <LogOut className="w-4 h-4" />
@@ -323,7 +323,7 @@ export const GoogleSheetsManager: React.FC = () => {
             <button
               onClick={handleGoogleLogin}
               disabled={isSigningIn}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#E2DDD0]/80 hover:bg-[#706C61]/10 text-[#221C16] font-sans text-xs font-bold rounded-xl shadow-md shadow-[#524738]/15 transition-all cursor-pointer border border-[#706C61]/25"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#FFFFFF]/80 hover:bg-[#475569]/10 text-[#0F172A] font-sans text-xs font-bold rounded-xl shadow-md shadow-[#1D4ED8]/15 transition-all cursor-pointer border border-[#475569]/25"
             >
               <svg className="w-4 h-4" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -345,13 +345,13 @@ export const GoogleSheetsManager: React.FC = () => {
               ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
               : statusMessage.type === "error"
               ? "bg-red-50 border-red-500/20 text-red-400"
-              : "bg-[#E2DDD0]/80 border-[#706C61]/25 text-[#221C16]"
+              : "bg-[#FFFFFF]/80 border-[#475569]/25 text-[#0F172A]"
           }`}
         >
           <div className="flex items-center gap-2">
             {statusMessage.type === "success" && <CheckCircle2 className="w-4 h-4 text-emerald-700" />}
             {statusMessage.type === "error" && <AlertCircle className="w-4 h-4 text-red-700" />}
-            {statusMessage.type === "info" && <Database className="w-4 h-4 text-[#221C16]" />}
+            {statusMessage.type === "info" && <Database className="w-4 h-4 text-[#0F172A]" />}
             <span>{statusMessage.text}</span>
           </div>
           <button onClick={() => setStatusMessage(null)} className="text-xs underline opacity-70 hover:opacity-100">
@@ -363,11 +363,11 @@ export const GoogleSheetsManager: React.FC = () => {
       {user ? (
         <div className="space-y-6">
           {/* Controls Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-[#E2DDD0]/80 p-4 border border-[#706C61]/25 rounded-xl">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-[#FFFFFF]/80 p-4 border border-[#475569]/25 rounded-xl">
             
             {/* Sheet selector */}
             <div className="md:col-span-5 flex flex-col gap-1">
-              <label className="text-[11px] font-bold text-[#221C16] uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-[#0F172A] uppercase tracking-wider">
                 Select Google Sheet
               </label>
               <div className="flex items-center gap-2">
@@ -378,7 +378,7 @@ export const GoogleSheetsManager: React.FC = () => {
                     setSelectedSheetId(id);
                     if (token && id) loadSpreadsheetDetails(id, token);
                   }}
-                  className="w-full bg-[#E2DDD0]/80 border border-[#706C61]/25 text-[#221C16] px-3 py-2 rounded-lg text-xs outline-none focus:border-[#706C61]/35"
+                  className="w-full bg-[#FFFFFF]/80 border border-[#475569]/25 text-[#0F172A] px-3 py-2 rounded-lg text-xs outline-none focus:border-[#475569]/35"
                 >
                   {sheetsList.length === 0 ? (
                     <option value="">No Google Sheets found in Drive</option>
@@ -393,7 +393,7 @@ export const GoogleSheetsManager: React.FC = () => {
                 <button
                   onClick={() => token && fetchSheetsList(token)}
                   disabled={isFetchingSheets}
-                  className="p-2 border border-[#706C61]/25 hover:bg-[#706C61]/10 text-[#221C16] rounded-lg transition-colors"
+                  className="p-2 border border-[#475569]/25 hover:bg-[#475569]/10 text-[#0F172A] rounded-lg transition-colors"
                   title="Refresh Sheets list"
                 >
                   <RefreshCw className={`w-4 h-4 ${isFetchingSheets ? "animate-spin" : ""}`} />
@@ -406,7 +406,7 @@ export const GoogleSheetsManager: React.FC = () => {
               <button
                 onClick={handleCreateNewSheet}
                 disabled={isCreatingSheet}
-                className="px-3.5 py-2 bg-[#EFE9DC] text-black font-bold text-xs rounded-lg hover:bg-[#EFE9DC] transition-colors flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#524738]/15"
+                className="px-3.5 py-2 bg-[#EFF6FF] text-black font-bold text-xs rounded-lg hover:bg-[#EFF6FF] transition-colors flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#1D4ED8]/15"
               >
                 <Plus className="w-4 h-4" />
                 <span>{isCreatingSheet ? "Creating..." : "Create New Legal Sheet"}</span>
@@ -415,18 +415,18 @@ export const GoogleSheetsManager: React.FC = () => {
               <button
                 onClick={requestExportCases}
                 disabled={isExporting || !selectedSheetId}
-                className="px-3.5 py-2 border border-[#706C61]/25 hover:bg-[#706C61]/10 text-[#221C16] font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 bg-[#E2DDD0]/80 cursor-pointer"
+                className="px-3.5 py-2 border border-[#475569]/25 hover:bg-[#475569]/10 text-[#0F172A] font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 bg-[#FFFFFF]/80 cursor-pointer"
               >
-                <Briefcase className="w-3.5 h-3.5 text-[#221C16]" />
+                <Briefcase className="w-3.5 h-3.5 text-[#0F172A]" />
                 <span>Sync Cases to Sheet</span>
               </button>
 
               <button
                 onClick={requestExportClients}
                 disabled={isExporting || !selectedSheetId}
-                className="px-3.5 py-2 border border-[#706C61]/25 hover:bg-[#706C61]/10 text-[#221C16] font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 bg-[#E2DDD0]/80 cursor-pointer"
+                className="px-3.5 py-2 border border-[#475569]/25 hover:bg-[#475569]/10 text-[#0F172A] font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 bg-[#FFFFFF]/80 cursor-pointer"
               >
-                <Users className="w-3.5 h-3.5 text-[#221C16]" />
+                <Users className="w-3.5 h-3.5 text-[#0F172A]" />
                 <span>Sync Clients to Sheet</span>
               </button>
 
@@ -435,7 +435,7 @@ export const GoogleSheetsManager: React.FC = () => {
                   href={`https://docs.google.com/spreadsheets/d/${selectedSheetId}/edit`}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-2 border border-[#706C61]/25 text-[#221C16] hover:bg-[#706C61]/10 rounded-lg transition-colors"
+                  className="p-2 border border-[#475569]/25 text-[#0F172A] hover:bg-[#475569]/10 rounded-lg transition-colors"
                   title="Open in Google Sheets"
                 >
                   <ExternalLink className="w-4 h-4" />
@@ -446,11 +446,11 @@ export const GoogleSheetsManager: React.FC = () => {
 
           {/* Spreadsheet Tabs & Live Table Viewer */}
           {activeSpreadsheet && (
-            <div className="border border-[#706C61]/25 rounded-xl bg-[#E2DDD0]/80 p-4 space-y-4">
+            <div className="border border-[#475569]/25 rounded-xl bg-[#FFFFFF]/80 p-4 space-y-4">
               
               {/* Tab Selector */}
-              <div className="flex items-center gap-2 border-b border-[#706C61]/20 pb-2 overflow-x-auto">
-                <span className="text-xs font-bold text-[#221C16] uppercase mr-2 flex items-center gap-1">
+              <div className="flex items-center gap-2 border-b border-[#475569]/20 pb-2 overflow-x-auto">
+                <span className="text-xs font-bold text-[#0F172A] uppercase mr-2 flex items-center gap-1">
                   <Table className="w-3.5 h-3.5" /> Tabs:
                 </span>
                 {activeSpreadsheet.sheets.map((s) => {
@@ -465,8 +465,8 @@ export const GoogleSheetsManager: React.FC = () => {
                       }}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                         isActive
-                          ? "bg-[#EFE9DC] text-black shadow-md shadow-[#524738]/15"
-                          : "bg-[#E2DDD0]/80 text-[#221C16] hover:bg-[#706C61]/10"
+                          ? "bg-[#EFF6FF] text-black shadow-md shadow-[#1D4ED8]/15"
+                          : "bg-[#FFFFFF]/80 text-[#0F172A] hover:bg-[#475569]/10"
                       }`}
                     >
                       {tTitle}
@@ -478,18 +478,18 @@ export const GoogleSheetsManager: React.FC = () => {
               {/* Table Data Preview */}
               <div className="overflow-x-auto max-h-96 rounded-lg border border-white/5">
                 {isReadingRows ? (
-                  <div className="py-12 text-center text-xs text-[#706C61] flex items-center justify-center gap-2">
-                    <RefreshCw className="w-4 h-4 animate-spin text-[#221C16]" />
+                  <div className="py-12 text-center text-xs text-[#475569] flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#0F172A]" />
                     <span>Loading rows from Google Sheet...</span>
                   </div>
                 ) : sheetRows.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-[#706C61]/80 italic">
+                  <div className="py-12 text-center text-xs text-[#475569]/80 italic">
                     This tab is currently empty or contains no data rows.
                   </div>
                 ) : (
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-[#E2DDD0]/80 border-b border-[#706C61]/25 text-[#221C16] font-bold">
+                      <tr className="bg-[#FFFFFF]/80 border-b border-[#475569]/25 text-[#0F172A] font-bold">
                         {sheetRows[0]?.map((col, idx) => (
                           <th key={idx} className="p-2.5 whitespace-nowrap border-r border-white/5">
                             {col}
@@ -499,9 +499,9 @@ export const GoogleSheetsManager: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-white/10">
                       {sheetRows.slice(1).map((row, rIdx) => (
-                        <tr key={rIdx} className="hover:bg-[#E2DDD0]/80/50 transition-colors">
+                        <tr key={rIdx} className="hover:bg-[#FFFFFF]/80/50 transition-colors">
                           {row.map((cell, cIdx) => (
-                            <td key={cIdx} className="p-2.5 border-r border-white/5 text-[#221C16]/90">
+                            <td key={cIdx} className="p-2.5 border-r border-white/5 text-[#0F172A]/90">
                               {cell}
                             </td>
                           ))}
@@ -517,12 +517,12 @@ export const GoogleSheetsManager: React.FC = () => {
         </div>
       ) : (
         /* Unauthenticated Prompt */
-        <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 bg-[#E2DDD0]/80 border border-dashed border-[#706C61]/25 rounded-2xl p-6">
-          <Database className="w-12 h-12 text-[#706C61]/80" />
-          <h4 className="font-serif text-lg font-bold text-[#221C16]">
+        <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 bg-[#FFFFFF]/80 border border-dashed border-[#475569]/25 rounded-2xl p-6">
+          <Database className="w-12 h-12 text-[#475569]/80" />
+          <h4 className="font-serif text-lg font-bold text-[#0F172A]">
             Google Workspace Not Connected
           </h4>
-          <p className="text-xs text-[#706C61] max-w-md">
+          <p className="text-xs text-[#475569] max-w-md">
             Sign in with your Google Account above to enable real-time export and synchronization of cases, client profiles, and consultation leads to Google Sheets.
           </p>
         </div>
@@ -531,23 +531,23 @@ export const GoogleSheetsManager: React.FC = () => {
       {/* Confirmation Modal for Mutating Ops */}
       {confirmDialog.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#E2DDD0]/80 border border-[#706C61]/25 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-[#221C16]">
-            <h4 className="font-serif text-lg font-bold text-[#221C16] border-b border-[#706C61]/25 pb-2">
+          <div className="bg-[#FFFFFF]/80 border border-[#475569]/25 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-[#0F172A]">
+            <h4 className="font-serif text-lg font-bold text-[#0F172A] border-b border-[#475569]/25 pb-2">
               {confirmDialog.title}
             </h4>
-            <p className="text-xs text-[#524738] leading-relaxed font-sans">
+            <p className="text-xs text-[#1D4ED8] leading-relaxed font-sans">
               {confirmDialog.message}
             </p>
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
-                className="px-4 py-2 border border-[#706C61]/25 text-[#221C16] text-xs rounded-lg hover:bg-[#E2DDD0]/80 transition-colors"
+                className="px-4 py-2 border border-[#475569]/25 text-[#0F172A] text-xs rounded-lg hover:bg-[#FFFFFF]/80 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDialog.onConfirm}
-                className="px-4 py-2 bg-[#EFE9DC] text-black font-bold text-xs rounded-lg hover:bg-[#EFE9DC] transition-colors shadow-md shadow-[#524738]/15"
+                className="px-4 py-2 bg-[#EFF6FF] text-black font-bold text-xs rounded-lg hover:bg-[#EFF6FF] transition-colors shadow-md shadow-[#1D4ED8]/15"
               >
                 Confirm & Write
               </button>

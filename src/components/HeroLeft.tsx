@@ -66,7 +66,7 @@ export default function HeroLeft() {
       {/* CTA Buttons */}
       <div className="flex flex-wrap items-center gap-4 mb-14" id="hero-ctas">
         <motion.a
-          whileHover={{ scale: 1.02, backgroundColor: "#EFE9DC" }}
+          whileHover={{ scale: 1.02, backgroundColor: "#EFF6FF" }}
           whileTap={{ scale: 0.98 }}
           href="#consultation-section"
           className={`flex items-center gap-1.5 px-6 py-3.5 bg-gold-antique text-emerald-deep font-bold tracking-[0.1em] uppercase rounded-sm shadow-xl shadow-gold-antique/10 transition-colors duration-300 ${
@@ -79,7 +79,7 @@ export default function HeroLeft() {
         </motion.a>
 
         <motion.a
-          whileHover={{ scale: 1.02, borderColor: "#EFE9DC", color: "#EFE9DC" }}
+          whileHover={{ scale: 1.02, borderColor: "#EFF6FF", color: "#EFF6FF" }}
           whileTap={{ scale: 0.98 }}
           href="#practice-section"
           className={`px-6 py-3.5 border border-gold-antique/40 text-gold-antique hover:text-gold-light hover:border-gold-light font-bold tracking-[0.1em] uppercase rounded-sm bg-transparent transition-all duration-300 ${

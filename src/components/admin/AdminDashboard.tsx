@@ -3,6 +3,7 @@ import gsap from "gsap";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import { PremiumBackground } from "./PremiumBackground";
+import { DownloadAppBanner } from "../DownloadAppBanner";
 import {
   Scale,
   Users,
@@ -82,14 +83,14 @@ const Toast: React.FC<{ message: string; onClose: () => void }> = ({ message, on
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="fixed top-20 right-4 sm:right-6 z-[60] bg-[#524738] text-[#EFE9DC] px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-[#706C61]/40 max-w-[calc(100vw-2rem)]"
+      className="fixed top-20 right-4 sm:right-6 z-[60] bg-[#1D4ED8] text-[#EFF6FF] px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-[#475569]/40 max-w-[calc(100vw-2rem)]"
     >
       <span>{message}</span>
       <button
         type="button"
         onClick={onClose}
         aria-label="Dismiss notification"
-        className="ml-2 text-[#EFE9DC]/80 hover:text-white cursor-pointer"
+        className="ml-2 text-[#EFF6FF]/80 hover:text-white cursor-pointer"
       >
         ×
       </button>
@@ -582,39 +583,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       </AnimatePresence>
 
       {/* Top Header Bar */}
-      <header ref={headerRef} className="min-h-16 md:h-20 safe-pt bg-white/85 backdrop-blur-xl border-b border-[#706C61]/20 px-4 md:px-8 py-2 md:py-0 flex items-center justify-between shrink-0 z-20 gap-3">
+      <header ref={headerRef} className="min-h-16 md:h-20 safe-pt bg-white/85 backdrop-blur-xl border-b border-[#475569]/20 px-4 md:px-8 py-2 md:py-0 flex items-center justify-between shrink-0 z-20 gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setIsSidebarCollapsed((prev) => !prev)}
             aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="hidden md:flex p-2 text-[#524738] border border-[#706C61]/25 hover:bg-[#706C61]/10 rounded-xl transition-all cursor-pointer bg-white shrink-0"
+            className="hidden md:flex p-2 text-[#1D4ED8] border border-[#475569]/25 hover:bg-[#475569]/10 rounded-xl transition-all cursor-pointer bg-white shrink-0"
           >
             {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
           <div className="flex flex-col min-w-0">
-            <h1 className="text-lg sm:text-xl tracking-tight text-[#221C16] flex items-center gap-2 font-serif font-medium truncate">
+            <h1 className="text-lg sm:text-xl tracking-tight text-[#0F172A] flex items-center gap-2 font-serif font-medium truncate">
               Hello Sikander Khan 👋
             </h1>
             <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-xs sm:text-sm font-medium text-[#524738]">{getGreeting()}</span>
-              <span className="text-sm text-[#706C61] hidden sm:inline">Ready to manage today's work?</span>
+              <span className="text-xs sm:text-sm font-medium text-[#1D4ED8]">{getGreeting()}</span>
+              <span className="text-sm text-[#475569] hidden sm:inline">Ready to manage today's work?</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 md:gap-5 shrink-0">
           <div className="hidden md:flex flex-col text-right">
-            <span className="text-sm font-medium text-[#221C16]">
+            <span className="text-sm font-medium text-[#0F172A]">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
-            <span className="text-[10px] text-[#706C61] uppercase tracking-wider font-semibold">
+            <span className="text-[10px] text-[#475569] uppercase tracking-wider font-semibold">
               {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
             </span>
           </div>
 
-          <div className="w-px h-8 bg-[#706C61]/20 hidden md:block" />
+          <div className="w-px h-8 bg-[#475569]/20 hidden md:block" />
 
           {/* Quick Search Bar */}
           <form
@@ -627,7 +628,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             }}
             className="relative hidden lg:block w-64"
           >
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#706C61] pointer-events-none" aria-hidden="true" />
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#475569] pointer-events-none" aria-hidden="true" />
             <input
               type="search"
               aria-label="Search cases, clients, or courts"
@@ -640,14 +641,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 }
               }}
               placeholder="Search cases, clients..."
-              className="w-full bg-white border border-[#706C61]/25 rounded-full pl-9 pr-8 py-2 text-sm text-[#221C16] placeholder-[#706C61]/50 focus:border-[#524738] focus:ring-2 focus:ring-[#524738]/10 transition-all outline-none shadow-sm"
+              className="w-full bg-white border border-[#475569]/25 rounded-full pl-9 pr-8 py-2 text-sm text-[#0F172A] placeholder-[#475569]/50 focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/10 transition-all outline-none shadow-sm"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-2.5 text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                className="absolute right-2.5 top-2.5 text-[#475569] hover:text-[#0F172A] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -659,7 +660,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={handleInstallPwa}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#524738] text-[#EFE9DC] text-xs font-bold shadow-sm hover:bg-[#382F25] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-xs font-bold shadow-sm hover:bg-[#1E40AF] transition-colors cursor-pointer"
               title="Install Mobile App"
             >
               <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
@@ -673,12 +674,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             onClick={() => setShowNotificationsDrawer((prev) => !prev)}
             aria-label={`Reminders & Notifications (${reminders.filter((r) => r.isTriggered).length} active)`}
             aria-expanded={showNotificationsDrawer}
-            className="p-2.5 text-[#524738] border border-[#706C61]/25 hover:bg-[#706C61]/10 rounded-full relative transition-all cursor-pointer bg-white"
+            className="p-2.5 text-[#1D4ED8] border border-[#475569]/25 hover:bg-[#475569]/10 rounded-full relative transition-all cursor-pointer bg-white"
             title="Reminders & Notifications"
           >
             <Bell className="w-4 h-4" aria-hidden="true" />
             {reminders.filter((r) => r.isTriggered).length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#524738] text-[#EFE9DC] text-[9px] font-bold flex items-center justify-center border-2 border-[#EFE9DC]">
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-[9px] font-bold flex items-center justify-center border-2 border-[#EFF6FF]">
                 {Math.min(reminders.filter((r) => r.isTriggered).length, 99)}
               </span>
             )}
@@ -690,7 +691,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             onClick={() => setActiveTab("security")}
             aria-label="Account & Security settings"
             title="Account & Security Settings"
-            className="w-9 h-9 rounded-full bg-[#524738] hover:bg-[#382F25] flex items-center justify-center text-[#EFE9DC] font-bold text-sm shadow-md shadow-[#524738]/20 cursor-pointer transition-colors"
+            className="w-9 h-9 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] flex items-center justify-center text-[#EFF6FF] font-bold text-sm shadow-md shadow-[#1D4ED8]/20 cursor-pointer transition-colors"
           >
             SK
           </button>
@@ -714,7 +715,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       {/* Main Workspace Body */}
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">
         {/* Left Sidebar Navigation */}
-        <motion.aside ref={sidebarRef} animate={{ width: isSidebarCollapsed ? 80 : 280 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="bg-white/80 backdrop-blur-2xl border-r border-[#706C61]/20 shrink-0 hidden md:flex m-4 rounded-[24px] shadow-[0_4px_20px_rgba(82,71,56,0.08)] relative overflow-hidden min-h-0">
+        <motion.aside ref={sidebarRef} animate={{ width: isSidebarCollapsed ? 80 : 280 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="bg-white/80 backdrop-blur-2xl border-r border-[#475569]/20 shrink-0 hidden md:flex m-4 rounded-[24px] shadow-[0_4px_20px_rgba(29,78,216,0.08)] relative overflow-hidden min-h-0">
           <SimpleBar className="w-full h-full p-3.5 flex flex-col justify-between">
             <nav aria-label="Workspace sections" className="space-y-1">
             {[
@@ -744,8 +745,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   }}
                   className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center px-2" : "justify-between px-3.5"} py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? "bg-[#524738] text-[#EFE9DC] font-bold shadow-md shadow-[#524738]/20"
-                      : "text-[#524738] hover:bg-[#706C61]/10 hover:text-[#221C16]"
+                      ? "bg-[#1D4ED8] text-[#EFF6FF] font-bold shadow-md shadow-[#1D4ED8]/20"
+                      : "text-[#1D4ED8] hover:bg-[#475569]/10 hover:text-[#0F172A]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -755,7 +756,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   {!isSidebarCollapsed && tab.count !== undefined && (
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
-                        isActive ? "bg-[#EFE9DC]/20 text-[#EFE9DC]" : "bg-[#706C61]/15 text-[#382F25]"
+                        isActive ? "bg-[#EFF6FF]/20 text-[#EFF6FF]" : "bg-[#475569]/15 text-[#1E40AF]"
                       }`}
                     >
                       {tab.count}
@@ -767,32 +768,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           </nav>
 
             {!isSidebarCollapsed && (
-              <div className="p-3 bg-white/90 border border-[#706C61]/20 rounded-xl space-y-1 text-[11px] text-[#524738] mt-6">
-                <p className="font-bold text-[#221C16]">Chamber Workstation</p>
-                <p className="text-[#706C61]">Civil & District Court Makrana</p>
-                <p className="text-[10px] text-[#706C61]/70 mt-1">Version 2.4 Encrypted Admin</p>
+              <div className="p-3 bg-white/90 border border-[#475569]/20 rounded-xl space-y-1 text-[11px] text-[#1D4ED8] mt-6">
+                <p className="font-bold text-[#0F172A]">Chamber Workstation</p>
+                <p className="text-[#475569]">Civil & District Court Makrana</p>
+                <p className="text-[10px] text-[#475569]/70 mt-1">Version 2.4 Encrypted Admin</p>
               </div>
             )}
           </SimpleBar>
         </motion.aside>
 
         {/* Content Pane */}
-        <main className="flex-1 min-h-0 min-w-0 bg-[#E2DDD0]/90">
+        <main className="flex-1 min-h-0 min-w-0 bg-[#FFFFFF]/90">
           <SimpleBar className="h-full p-4 pb-24 md:p-6 md:pb-6 space-y-6 scroll-smooth">
           {/* TAB 1: ANALYTICS OVERVIEW */}
           {activeTab === "analytics" && (
             <div className="space-y-6">
               {/* Today's Court Hearing List & PDF Quick Banner */}
-              <div className="bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-[24px] p-5 md:p-6 shadow-md shadow-[#524738]/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+              <div className="bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-[24px] p-5 md:p-6 shadow-md shadow-[#1D4ED8]/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
                 <div className="space-y-1.5">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#524738] text-[#EFE9DC] text-[10px] font-bold uppercase tracking-wider">
-                    <FileText className="w-3 h-3 text-[#EFE9DC]" />
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#1D4ED8] text-[#EFF6FF] text-[10px] font-bold uppercase tracking-wider">
+                    <FileText className="w-3 h-3 text-[#EFF6FF]" />
                     <span>Daily Cause List • {todayStr}</span>
                   </div>
-                  <h3 className="text-xl font-serif font-extrabold text-[#221C16]">
+                  <h3 className="text-xl font-serif font-extrabold text-[#0F172A]">
                     Today's Hearing List PDF (दैनिक पेशी सूची)
                   </h3>
-                  <p className="text-xs text-[#524738] font-medium">
+                  <p className="text-xs text-[#1D4ED8] font-medium">
                     {todaysHearingsList.length > 0
                       ? `${todaysHearingsList.length} verified court hearing(s) scheduled for today across ACJM, ADJ & MJM Courts.`
                       : "No court appearances scheduled for today in chamber records."}
@@ -808,16 +809,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         showToast("Error generating PDF");
                       }
                     }}
-                    className="px-4 py-2.5 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold text-xs rounded-xl shadow-md shadow-[#524738]/20 transition-all flex items-center gap-2 cursor-pointer"
+                    className="px-4 py-2.5 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold text-xs rounded-xl shadow-md shadow-[#1D4ED8]/20 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-[#EFE9DC]" />
+                    <Download className="w-4 h-4 text-[#EFF6FF]" />
                     <span>Download Today's PDF</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("pdf-manager")}
-                    className="px-4 py-2.5 bg-white/80 hover:bg-white text-[#221C16] border border-[#706C61]/30 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 bg-white/80 hover:bg-white text-[#0F172A] border border-[#475569]/30 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Eye className="w-3.5 h-3.5 text-[#524738]" />
+                    <Eye className="w-3.5 h-3.5 text-[#1D4ED8]" />
                     <span>Open PDF Manager</span>
                   </button>
                 </div>
@@ -826,8 +827,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               {/* Court-wise Analytics Overview Cards */}
               <div>
                 <div className="mb-4">
-                  <h2 className="text-xl font-serif font-bold text-[#221C16]">Court-wise Analytics Overview</h2>
-                  <p className="text-xs text-[#524738] font-medium">Click any court card to view and filter cases belonging to that specific court jurisdiction.</p>
+                  <h2 className="text-xl font-serif font-bold text-[#0F172A]">Court-wise Analytics Overview</h2>
+                  <p className="text-xs text-[#1D4ED8] font-medium">Click any court card to view and filter cases belonging to that specific court jurisdiction.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
@@ -851,24 +852,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setActiveTab("cases");
                           setActiveCase(null);
                         }}
-                        className="bg-white/95 backdrop-blur-xl border border-[#706C61]/30 rounded-[24px] p-6 shadow-md hover:shadow-xl hover:border-[#524738] transition-all cursor-pointer flex flex-col justify-between space-y-5 group"
+                        className="bg-white/95 backdrop-blur-xl border border-[#475569]/30 rounded-[24px] p-6 shadow-md hover:shadow-xl hover:border-[#1D4ED8] transition-all cursor-pointer flex flex-col justify-between space-y-5 group"
                       >
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#706C61]">Jurisdiction</span>
-                            <h3 className="text-xl font-serif font-bold text-[#221C16] group-hover:text-[#524738] transition-colors">{item.courtTitle}</h3>
-                            <p className="text-xs text-[#524738] font-medium">{item.description}</p>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#475569]">Jurisdiction</span>
+                            <h3 className="text-xl font-serif font-bold text-[#0F172A] group-hover:text-[#1D4ED8] transition-colors">{item.courtTitle}</h3>
+                            <p className="text-xs text-[#1D4ED8] font-medium">{item.description}</p>
                           </div>
-                          <div className="p-3 bg-[#524738]/10 text-[#524738] rounded-2xl group-hover:bg-[#524738] group-hover:text-[#EFE9DC] transition-all shrink-0">
+                          <div className="p-3 bg-[#1D4ED8]/10 text-[#1D4ED8] rounded-2xl group-hover:bg-[#1D4ED8] group-hover:text-[#EFF6FF] transition-all shrink-0">
                             <IconComponent className="w-6 h-6" />
                           </div>
                         </div>
 
                         {/* Counts Grid */}
-                        <div className="grid grid-cols-3 gap-2 bg-[#E2DDD0]/50 p-3 rounded-2xl border border-[#706C61]/20">
+                        <div className="grid grid-cols-3 gap-2 bg-[#FFFFFF]/50 p-3 rounded-2xl border border-[#475569]/20">
                           <div className="text-center p-2 rounded-xl bg-white shadow-xs">
-                            <span className="text-[10px] text-[#524738] font-bold block uppercase tracking-tight">Total</span>
-                            <span className="text-xl font-serif font-bold text-[#221C16]">{totalCases}</span>
+                            <span className="text-[10px] text-[#1D4ED8] font-bold block uppercase tracking-tight">Total</span>
+                            <span className="text-xl font-serif font-bold text-[#0F172A]">{totalCases}</span>
                           </div>
                           <div className="text-center p-2 rounded-xl bg-emerald-50 border border-emerald-200 shadow-xs">
                             <span className="text-[10px] text-emerald-800 font-bold block uppercase tracking-tight">Active</span>
@@ -880,7 +881,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-[#706C61]/15 text-xs text-[#524738] font-bold group-hover:text-[#221C16]">
+                        <div className="flex items-center justify-between pt-2 border-t border-[#475569]/15 text-xs text-[#1D4ED8] font-bold group-hover:text-[#0F172A]">
                           <span>Filter cases for {item.courtKey}</span>
                           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
@@ -892,15 +893,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
               {/* Quick Actions & Urgent Hearings */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="gsap-fade-in lg:col-span-2 p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-md shadow-[#524738]/15">
+                <div className="gsap-fade-in lg:col-span-2 p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-md shadow-[#1D4ED8]/15">
                   <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                    <h2 className="text-base font-bold text-[#221C16] font-serif flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-[#524738]" />
+                    <h2 className="text-base font-bold text-[#0F172A] font-serif flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-[#1D4ED8]" />
                       Upcoming Priority Court Appearances
                     </h2>
                     <button
                       onClick={() => setActiveTab("cases")}
-                      className="text-xs text-[#221C16] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-[#0F172A] font-bold hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       View All Records <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -914,21 +915,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setActiveCase(c);
                           setActiveTab("cases");
                         }}
-                        className="p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl flex items-center justify-between hover:border-[#706C61]/35 transition-all cursor-pointer"
+                        className="p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl flex items-center justify-between hover:border-[#475569]/35 transition-all cursor-pointer"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#221C16] text-xs">{c.caseTitle}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#706C61]/15 text-[#221C16] font-bold">
+                            <span className="font-bold text-[#0F172A] text-xs">{c.caseTitle}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#475569]/15 text-[#0F172A] font-bold">
                               {c.caseNumber}
                             </span>
                           </div>
-                          <p className="text-xs text-[#524738]">
+                          <p className="text-xs text-[#1D4ED8]">
                             Client: <strong>{c.clientName}</strong> | Court: {c.courtName}
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-xs font-bold text-[#524738] block">
+                          <span className="text-xs font-bold text-[#1D4ED8] block">
                             {c.hearings[0]?.currentHearingDate || "Pending Schedule"}
                           </span>
                           <span className="text-[10px] text-emerald-600 font-bold">{c.currentStage}</span>
@@ -938,12 +939,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
                 </div>
 
-                <div className="gsap-fade-in p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-md shadow-[#524738]/15">
-                  <h2 className="text-base font-bold text-[#221C16] font-serif mb-4">Quick Actions</h2>
+                <div className="gsap-fade-in p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-md shadow-[#1D4ED8]/15">
+                  <h2 className="text-base font-bold text-[#0F172A] font-serif mb-4">Quick Actions</h2>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setShowNewCaseModal(true)}
-                      className="w-full p-4 bg-[#524738] border border-[#524738] text-[#EFE9DC] font-bold rounded-xl text-[11px] hover:bg-[#382F25] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#1D4ED8] border border-[#1D4ED8] text-[#EFF6FF] font-bold rounded-xl text-[11px] hover:bg-[#1E40AF] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
                       <Plus className="w-5 h-5" /> Add New Case
                     </button>
@@ -956,13 +957,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           showToast("Error generating PDF");
                         }
                       }}
-                      className="w-full p-4 bg-[#524738] border border-[#524738] text-[#EFE9DC] font-bold rounded-xl text-[11px] hover:bg-[#382F25] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#1D4ED8] border border-[#1D4ED8] text-[#EFF6FF] font-bold rounded-xl text-[11px] hover:bg-[#1E40AF] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
-                      <Download className="w-5 h-5 text-[#EFE9DC]" /> Today's PDF
+                      <Download className="w-5 h-5 text-[#EFF6FF]" /> Today's PDF
                     </button>
                     <button
                       onClick={() => setNewsModalState({ show: true, item: null })}
-                      className="w-full p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#221C16] font-bold rounded-xl text-[11px] hover:bg-[#DCD7C8] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold rounded-xl text-[11px] hover:bg-[#DBEAFE] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
                       <Newspaper className="w-5 h-5" /> Create Blog
                     </button>
@@ -970,21 +971,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       onClick={() => {
                         setClientModalState({ show: true, client: null, mode: "create" });
                       }}
-                      className="w-full p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#221C16] font-bold rounded-xl text-[11px] hover:bg-[#DCD7C8] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold rounded-xl text-[11px] hover:bg-[#DBEAFE] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
                       <Users className="w-5 h-5" /> Add Client
                     </button>
                     <button
                       onClick={() => setShowAddHearingModal(true)}
-                      className="w-full p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#221C16] font-bold rounded-xl text-[11px] hover:bg-[#DCD7C8] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold rounded-xl text-[11px] hover:bg-[#DBEAFE] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
                       <CalendarIcon className="w-5 h-5" /> Schedule Meeting
                     </button>
                     <button
                       onClick={() => setActiveTab("pdf-manager")}
-                      className="w-full p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#221C16] font-bold rounded-xl text-[11px] hover:bg-[#DCD7C8] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer transition-all"
+                      className="w-full p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold rounded-xl text-[11px] hover:bg-[#DBEAFE] flex flex-col items-center justify-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer transition-all"
                     >
-                      <FileText className="w-5 h-5 text-[#524738]" /> Hearing PDF Manager
+                      <FileText className="w-5 h-5 text-[#1D4ED8]" /> Hearing PDF Manager
                     </button>
                   </div>
                 </div>
@@ -996,23 +997,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {activeTab === "cases" && (
             <div className="space-y-6">
               {/* Header Bar & Search */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl shadow-md shadow-[#524738]/15">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15">
                 <div className="flex items-center gap-3">
                   <div className="relative w-64">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#706C61]/80" />
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#475569]/80" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search title, client, court..."
-                      className="w-full bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#221C16] outline-none focus:border-[#706C61]/35"
+                      className="w-full bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#0F172A] outline-none focus:border-[#475569]/35"
                     />
                   </div>
 
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg px-3 py-2 text-xs text-[#221C16] outline-none"
+                    className="bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg px-3 py-2 text-xs text-[#0F172A] outline-none"
                   >
                     <option value="All">All Statuses</option>
                     <option value="Active">Active</option>
@@ -1024,7 +1025,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <select
                     value={courtFilter}
                     onChange={(e) => setCourtFilter(e.target.value)}
-                    className="bg-white border border-[#706C61]/35 rounded-lg px-3 py-2 text-xs text-[#221C16] font-bold outline-none"
+                    className="bg-white border border-[#475569]/35 rounded-lg px-3 py-2 text-xs text-[#0F172A] font-bold outline-none"
                   >
                     <option value="All">All Courts</option>
                     <option value="ACJM">ACJM Courts</option>
@@ -1056,8 +1057,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       onClick={() => setCaseCategoryFilter(cat.key as any)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all cursor-pointer ${
                         caseCategoryFilter === cat.key
-                          ? "bg-[#EFE9DC] text-black font-bold"
-                          : "bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#524738] hover:text-[#221C16]"
+                          ? "bg-[#EFF6FF] text-black font-bold"
+                          : "bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#1D4ED8] hover:text-[#0F172A]"
                       }`}
                     >
                       {cat.label}
@@ -1067,7 +1068,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 <button
                   onClick={() => setShowNewCaseModal(true)}
-                  className="px-4 py-2 bg-[#EFE9DC] text-black font-bold rounded-lg text-xs hover:bg-[#EFE9DC] flex items-center gap-2 shadow-md shadow-[#524738]/15 shrink-0 cursor-pointer"
+                  className="px-4 py-2 bg-[#EFF6FF] text-black font-bold rounded-lg text-xs hover:bg-[#EFF6FF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 shrink-0 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   New Case Record
@@ -1080,43 +1081,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 <div className="space-y-6">
                   <button
                     onClick={() => setActiveCase(null)}
-                    className="text-xs text-[#221C16] hover:underline flex items-center gap-1 font-bold cursor-pointer"
+                    className="text-xs text-[#0F172A] hover:underline flex items-center gap-1 font-bold cursor-pointer"
                   >
                     ← Back to Case Records List
                   </button>
 
                   {/* Case Summary Card */}
-                  <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-lg shadow-black/50">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#706C61]/20 pb-4">
+                  <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-lg shadow-black/50">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#475569]/20 pb-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#E2DDD0]/90 border border-[#706C61]/25 text-[#221C16] font-bold">
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#FFFFFF]/90 border border-[#475569]/25 text-[#0F172A] font-bold">
                             {activeCase.caseNumber}
                           </span>
                           <span className="text-xs px-2.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-bold">
                             {activeCase.currentStatus}
                           </span>
-                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#524738]/10 border border-[#524738]/30 text-[#524738] font-bold">
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#1D4ED8]/10 border border-[#1D4ED8]/30 text-[#1D4ED8] font-bold">
                             Priority: {activeCase.priority.toUpperCase()}
                           </span>
                         </div>
-                        <h2 className="text-xl font-bold text-[#221C16] font-serif mt-2">{activeCase.caseTitle}</h2>
-                        <p className="text-xs text-[#524738] mt-1">
-                          Client: <strong className="text-[#221C16]">{activeCase.clientName}</strong> ({activeCase.clientMobile}) vs. {activeCase.opponentName}
+                        <h2 className="text-xl font-bold text-[#0F172A] font-serif mt-2">{activeCase.caseTitle}</h2>
+                        <p className="text-xs text-[#1D4ED8] mt-1">
+                          Client: <strong className="text-[#0F172A]">{activeCase.clientName}</strong> ({activeCase.clientMobile}) vs. {activeCase.opponentName}
                         </p>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => setEditingCaseRecord(activeCase)}
-                          className="px-3 py-2 rounded-lg border border-[#706C61]/25 text-[#221C16] hover:bg-[#E2DDD0]/90 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-2 rounded-lg border border-[#475569]/25 text-[#0F172A] hover:bg-[#FFFFFF]/90 text-xs font-bold flex items-center gap-1 cursor-pointer"
                         >
                           <Edit className="w-3.5 h-3.5" /> Edit Record
                         </button>
                         <button
                           onClick={() => toggleStarCase(activeCase.id)}
                           className={`p-2 rounded-lg border transition-all cursor-pointer ${
-                            activeCase.isStarred ? "bg-[#524738] border-[#524738] text-[#EFE9DC] font-bold" : "border-[#706C61]/25 text-[#706C61]"
+                            activeCase.isStarred ? "bg-[#1D4ED8] border-[#1D4ED8] text-[#EFF6FF] font-bold" : "border-[#475569]/25 text-[#475569]"
                           }`}
                         >
                           <Star className="w-4 h-4" />
@@ -1124,14 +1125,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         <button
                           onClick={() => togglePinCase(activeCase.id)}
                           className={`p-2 rounded-lg border transition-all cursor-pointer ${
-                            activeCase.isPinned ? "bg-[#524738] text-[#EFE9DC] font-bold" : "border-[#706C61]/25 text-[#706C61]"
+                            activeCase.isPinned ? "bg-[#1D4ED8] text-[#EFF6FF] font-bold" : "border-[#475569]/25 text-[#475569]"
                           }`}
                         >
                           <Pin className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowAddHearingModal(true)}
-                          className="px-4 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg text-xs hover:bg-[#382F25] flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#524738]/15"
+                          className="px-4 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg text-xs hover:bg-[#1E40AF] flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#1D4ED8]/15"
                         >
                           <Plus className="w-4 h-4" /> Add Hearing Record
                         </button>
@@ -1140,7 +1141,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                     {/* Stage Progress Bar */}
                     <div>
-                      <span className="text-[10px] tracking-wider text-[#706C61] uppercase font-bold">
+                      <span className="text-[10px] tracking-wider text-[#475569] uppercase font-bold">
                         Immutable Stage History Tracker
                       </span>
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mt-2">
@@ -1169,10 +1170,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               key={stg}
                               className={`p-2 rounded-lg border text-center transition-all ${
                                 isCurrent
-                                  ? "bg-[#EFE9DC] text-black font-bold border-[#706C61]/35 shadow-md shadow-[#524738]/15"
+                                  ? "bg-[#EFF6FF] text-black font-bold border-[#475569]/35 shadow-md shadow-[#1D4ED8]/15"
                                   : isPassed
-                                  ? "bg-[#E2DDD0]/90 border-[#706C61]/35 text-[#221C16]"
-                                  : "border-[#706C61]/20 text-[#706C61]/60"
+                                  ? "bg-[#FFFFFF]/90 border-[#475569]/35 text-[#0F172A]"
+                                  : "border-[#475569]/20 text-[#475569]/60"
                               }`}
                             >
                               <p className="text-[10px] uppercase font-bold">{stg}</p>
@@ -1184,23 +1185,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
 
                   {/* Hearing Timeline History */}
-                  <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-lg shadow-black/50">
-                    <h3 className="text-sm font-bold text-[#221C16] flex items-center gap-2 font-serif">
-                      <Clock className="w-4 h-4 text-[#221C16]" />
+                  <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-lg shadow-black/50">
+                    <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2 font-serif">
+                      <Clock className="w-4 h-4 text-[#0F172A]" />
                       Hearing Timeline History
                     </h3>
 
-                    <div className="space-y-4 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EFE9DC]/20">
+                    <div className="space-y-4 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EFF6FF]/20">
                       {activeCase.hearings.map((h) => (
                         <div key={h.id} className="relative pl-10 group">
-                          <div className="absolute left-2 top-2 w-4 h-4 rounded-full bg-[#EFE9DC] border-2 border-[#0B0B0B]" />
-                          <div className="p-4 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl space-y-2">
+                          <div className="absolute left-2 top-2 w-4 h-4 rounded-full bg-[#EFF6FF] border-2 border-[#0B0B0B]" />
+                          <div className="p-4 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl space-y-2">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-[#221C16]">
+                              <span className="font-bold text-[#0F172A]">
                                 {h.currentHearingDate} ({h.hearingTime})
                               </span>
                               <div className="flex items-center gap-2">
-                                <span className="text-[#706C61]">{h.judgeName}</span>
+                                <span className="text-[#475569]">{h.judgeName}</span>
                                 <button
                                   onClick={() => {
                                     if (confirm("Delete this hearing entry from timeline?")) {
@@ -1214,7 +1215,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                                 </button>
                               </div>
                             </div>
-                            <p className="text-xs text-[#221C16]">
+                            <p className="text-xs text-[#0F172A]">
                               <strong>Purpose:</strong> {h.purpose}
                             </p>
                             {h.result && (
@@ -1223,7 +1224,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               </p>
                             )}
                             {h.nextAction && (
-                              <p className="text-xs text-[#221C16] font-bold">
+                              <p className="text-xs text-[#0F172A] font-bold">
                                 <strong>Next Action:</strong> {h.nextAction}
                               </p>
                             )}
@@ -1242,7 +1243,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   {/* Mobile App Card List */}
                   <div className="md:hidden space-y-3">
                     {sortedCases.length === 0 ? (
-                      <div className="p-8 text-center bg-white/75 rounded-2xl border border-[#706C61]/20 text-xs text-[#706C61]">
+                      <div className="p-8 text-center bg-white/75 rounded-2xl border border-[#475569]/20 text-xs text-[#475569]">
                         No matching case records found.
                       </div>
                     ) : (
@@ -1250,14 +1251,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         <div
                           key={c.id}
                           onClick={() => setActiveCase(c)}
-                          className="p-4 bg-white/90 border border-[#706C61]/25 rounded-2xl shadow-sm active:scale-[0.99] transition-transform space-y-2.5 cursor-pointer"
+                          className="p-4 bg-white/90 border border-[#475569]/25 rounded-2xl shadow-sm active:scale-[0.99] transition-transform space-y-2.5 cursor-pointer"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <span className="font-mono text-[11px] font-bold text-[#524738] block">{c.caseNumber}</span>
-                              <h3 className="text-sm font-bold text-[#221C16] truncate">{c.partyName || c.clientName}</h3>
+                              <span className="font-mono text-[11px] font-bold text-[#1D4ED8] block">{c.caseNumber}</span>
+                              <h3 className="text-sm font-bold text-[#0F172A] truncate">{c.partyName || c.clientName}</h3>
                               {c.opponentName && (
-                                <p className="text-[11px] text-[#524738] truncate">vs. {c.opponentName}</p>
+                                <p className="text-[11px] text-[#1D4ED8] truncate">vs. {c.opponentName}</p>
                               )}
                             </div>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
@@ -1272,18 +1273,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             }`}>
                               {c.caseType}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-[#EFE9DC] text-[#221C16] font-semibold">{c.courtName}</span>
-                            <span className="px-2 py-0.5 rounded bg-white border border-[#706C61]/30 text-[#524738] font-bold">{c.currentStage}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#EFF6FF] text-[#0F172A] font-semibold">{c.courtName}</span>
+                            <span className="px-2 py-0.5 rounded bg-white border border-[#475569]/30 text-[#1D4ED8] font-bold">{c.currentStage}</span>
                           </div>
-                          <div className="flex items-center justify-between pt-2 border-t border-[#706C61]/15 text-[11px]">
-                            <span className="font-semibold text-[#524738]">
-                              Next: <strong className="text-[#221C16]">{c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}</strong>
+                          <div className="flex items-center justify-between pt-2 border-t border-[#475569]/15 text-[11px]">
+                            <span className="font-semibold text-[#1D4ED8]">
+                              Next: <strong className="text-[#0F172A]">{c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}</strong>
                             </span>
                             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                               <button
                                 type="button"
                                 onClick={() => setEditingCaseRecord(c)}
-                                className="px-2.5 py-1 bg-[#EFE9DC] border border-[#706C61]/25 rounded-lg text-[#221C16] font-bold text-[11px]"
+                                className="px-2.5 py-1 bg-[#EFF6FF] border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold text-[11px]"
                               >
                                 Edit
                               </button>
@@ -1308,10 +1309,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
 
                   {/* Desktop Table */}
-                  <div className="hidden md:block bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#524738]/15">
+                  <div className="hidden md:block bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#1D4ED8]/15">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-[#E2DDD0]/90 border-b border-[#706C61]/25 text-[#221C16] uppercase text-[10px] tracking-wider font-bold">
+                      <thead className="bg-[#FFFFFF]/90 border-b border-[#475569]/25 text-[#0F172A] uppercase text-[10px] tracking-wider font-bold">
                         <tr>
                           <th className="p-3.5">S.No</th>
                           <th className="p-3.5">Party Name</th>
@@ -1324,16 +1325,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <th className="p-3.5 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/10 text-[#221C16]">
+                      <tbody className="divide-y divide-white/10 text-[#0F172A]">
                         {sortedCases.map((c, idx) => (
-                          <tr key={c.id} className="hover:bg-[#E2DDD0]/90/50 transition-colors">
-                            <td className="p-3.5 font-mono text-[#221C16] font-semibold">{idx + 1}</td>
-                             <td className="p-3.5 font-bold text-[#221C16]">
+                          <tr key={c.id} className="hover:bg-[#FFFFFF]/90/50 transition-colors">
+                            <td className="p-3.5 font-mono text-[#0F172A] font-semibold">{idx + 1}</td>
+                             <td className="p-3.5 font-bold text-[#0F172A]">
                               {c.partyName || c.clientName}
-                              {c.opponentName && <span className="block text-[10px] text-[#524738] font-semibold">vs. {c.opponentName}</span>}
-                              {c.clientMobile && <span className="block text-[10px] text-[#382F25] font-bold">📱 {c.clientMobile}</span>}
+                              {c.opponentName && <span className="block text-[10px] text-[#1D4ED8] font-semibold">vs. {c.opponentName}</span>}
+                              {c.clientMobile && <span className="block text-[10px] text-[#1E40AF] font-bold">📱 {c.clientMobile}</span>}
                             </td>
-                            <td className="p-3.5 font-mono text-[#221C16] font-bold">{c.caseNumber}</td>
+                            <td className="p-3.5 font-mono text-[#0F172A] font-bold">{c.caseNumber}</td>
                             <td className="p-3.5">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                 c.caseType.toLowerCase().includes("criminal") ? "bg-rose-100 border border-rose-300 text-rose-900" : "bg-sky-100 border border-sky-300 text-sky-900"
@@ -1341,13 +1342,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                                 {c.caseType}
                               </span>
                             </td>
-                            <td className="p-3.5 text-[#221C16] font-semibold">{c.courtName}</td>
+                            <td className="p-3.5 text-[#0F172A] font-semibold">{c.courtName}</td>
                             <td className="p-3.5">
-                              <span className="px-2 py-0.5 rounded-full bg-white border border-[#706C61]/35 text-[#221C16] text-[10px] font-bold shadow-2xs">
+                              <span className="px-2 py-0.5 rounded-full bg-white border border-[#475569]/35 text-[#0F172A] text-[10px] font-bold shadow-2xs">
                                 {c.currentStage}
                               </span>
                             </td>
-                            <td className="p-3.5 font-bold text-[#221C16]">
+                            <td className="p-3.5 font-bold text-[#0F172A]">
                               {c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}
                             </td>
                             <td className="p-3.5">
@@ -1360,13 +1361,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             <td className="p-3.5 text-right space-x-2">
                               <button
                                 onClick={() => setActiveCase(c)}
-                                className="px-3 py-1 bg-[#EFE9DC] text-black font-bold rounded hover:bg-[#EFE9DC] transition-all inline-flex items-center gap-1 cursor-pointer"
+                                className="px-3 py-1 bg-[#EFF6FF] text-black font-bold rounded hover:bg-[#EFF6FF] transition-all inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="w-3.5 h-3.5" /> View
                               </button>
                               <button
                                 onClick={() => setEditingCaseRecord(c)}
-                                className="px-3 py-1 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded text-[#221C16] hover:bg-[#706C61]/10 font-semibold transition-all inline-flex items-center gap-1 cursor-pointer"
+                                className="px-3 py-1 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded text-[#0F172A] hover:bg-[#475569]/10 font-semibold transition-all inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Edit className="w-3.5 h-3.5" /> Edit
                               </button>
@@ -1397,11 +1398,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB 4: HEARING CALENDAR */}
           {activeTab === "calendar" && (
             <div className="space-y-6">
-              <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-md shadow-[#524738]/15">
+              <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-md shadow-[#1D4ED8]/15">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-[#221C16] font-serif">Interactive Hearing Calendar & Reminders</h2>
-                    <p className="text-xs text-[#524738] font-medium">Click on any date to inspect cause lists, reschedule dates, or download PDF.</p>
+                    <h2 className="text-lg font-bold text-[#0F172A] font-serif">Interactive Hearing Calendar & Reminders</h2>
+                    <p className="text-xs text-[#1D4ED8] font-medium">Click on any date to inspect cause lists, reschedule dates, or download PDF.</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -1413,9 +1414,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           showToast("Error generating PDF");
                         }
                       }}
-                      className="px-3.5 py-2 bg-[#524738] text-[#EFE9DC] hover:bg-[#382F25] font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-colors cursor-pointer"
+                      className="px-3.5 py-2 bg-[#1D4ED8] text-[#EFF6FF] hover:bg-[#1E40AF] font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-colors cursor-pointer"
                     >
-                      <Download className="w-4 h-4 text-[#EFE9DC]" /> Download Today's PDF
+                      <Download className="w-4 h-4 text-[#EFF6FF]" /> Download Today's PDF
                     </button>
                     <button 
                       onClick={sendTomorrowReminders}
@@ -1426,7 +1427,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between flex-wrap gap-2 bg-white/60 border border-[#706C61]/20 rounded-xl px-4 py-2.5">
+                <div className="flex items-center justify-between flex-wrap gap-2 bg-white/60 border border-[#475569]/20 rounded-xl px-4 py-2.5">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -1438,11 +1439,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             : { year: prev.year, month: prev.month - 1 }
                         )
                       }
-                      className="p-1.5 rounded-lg border border-[#706C61]/25 bg-white text-[#221C16] hover:bg-[#EFE9DC] cursor-pointer"
+                      className="p-1.5 rounded-lg border border-[#475569]/25 bg-white text-[#0F172A] hover:bg-[#EFF6FF] cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <h3 className="text-sm sm:text-base font-serif font-bold text-[#221C16] min-w-[150px] text-center">
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-[#0F172A] min-w-[150px] text-center">
                       {new Date(calendarMonth.year, calendarMonth.month, 1).toLocaleDateString("en-IN", {
                         month: "long",
                         year: "numeric",
@@ -1458,7 +1459,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             : { year: prev.year, month: prev.month + 1 }
                         )
                       }
-                      className="p-1.5 rounded-lg border border-[#706C61]/25 bg-white text-[#221C16] hover:bg-[#EFE9DC] cursor-pointer"
+                      className="p-1.5 rounded-lg border border-[#475569]/25 bg-white text-[#0F172A] hover:bg-[#EFF6FF] cursor-pointer"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -1469,7 +1470,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       const now = new Date();
                       setCalendarMonth({ year: now.getFullYear(), month: now.getMonth() });
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-[#524738] text-[#EFE9DC] text-xs font-bold hover:bg-[#382F25] cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-[#1D4ED8] text-[#EFF6FF] text-xs font-bold hover:bg-[#1E40AF] cursor-pointer"
                   >
                     Today
                   </button>
@@ -1477,7 +1478,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 <div className="overflow-x-auto">
                   <div className="min-w-[540px] space-y-2">
-                    <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#221C16] uppercase border-b border-[#706C61]/20 pb-2">
+                    <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#0F172A] uppercase border-b border-[#475569]/20 pb-2">
                       <span>Sun</span>
                       <span>Mon</span>
                       <span>Tue</span>
@@ -1495,7 +1496,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                         return [
                           ...Array.from({ length: firstWeekday }).map((_, idx) => (
-                            <div key={`empty-${idx}`} className="p-2 rounded-xl bg-[#E2DDD0]/35 border border-transparent min-h-[75px]" />
+                            <div key={`empty-${idx}`} className="p-2 rounded-xl bg-[#FFFFFF]/35 border border-transparent min-h-[75px]" />
                           )),
                           ...Array.from({ length: daysInMonth }).map((_, i) => {
                             const dayNum = i + 1;
@@ -1510,27 +1511,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                                 onClick={() => setCalendarModalState({ show: true, dateStr, cases: dayCases })}
                                 className={`p-2 text-left border rounded-xl min-h-[78px] space-y-1 transition-all cursor-pointer flex flex-col items-stretch justify-start ${
                                   isTodayCell
-                                    ? "bg-white border-[#524738] ring-2 ring-[#524738]/20 shadow-sm"
-                                    : "border-[#706C61]/20 bg-[#E2DDD0]/90 hover:border-[#524738]/50 hover:bg-white/70"
+                                    ? "bg-white border-[#1D4ED8] ring-2 ring-[#1D4ED8]/20 shadow-sm"
+                                    : "border-[#475569]/20 bg-[#FFFFFF]/90 hover:border-[#1D4ED8]/50 hover:bg-white/70"
                                 }`}
                               >
                                 <div className="flex items-center justify-between">
-                                  <span className={`text-[11px] font-bold ${isTodayCell ? "text-[#524738]" : "text-[#221C16]"}`}>
+                                  <span className={`text-[11px] font-bold ${isTodayCell ? "text-[#1D4ED8]" : "text-[#0F172A]"}`}>
                                     {dayNum}
                                   </span>
                                   {isTodayCell && (
-                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#524738] text-[#EFE9DC]">
+                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#1D4ED8] text-[#EFF6FF]">
                                       Today
                                     </span>
                                   )}
                                 </div>
                                 {dayCases.slice(0, 2).map((dh: CaseRecord) => (
-                                  <div key={dh.id} className="p-1 rounded bg-[#524738]/10 border border-[#524738]/30 text-[9px] font-bold text-[#524738] truncate">
+                                  <div key={dh.id} className="p-1 rounded bg-[#1D4ED8]/10 border border-[#1D4ED8]/30 text-[9px] font-bold text-[#1D4ED8] truncate">
                                     • {dh.caseNumber}
                                   </div>
                                 ))}
                                 {dayCases.length > 2 && (
-                                  <span className="text-[9px] font-bold text-[#524738]">+{dayCases.length - 2} more</span>
+                                  <span className="text-[9px] font-bold text-[#1D4ED8]">+{dayCases.length - 2} more</span>
                                 )}
                               </button>
                             );
@@ -1547,15 +1548,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB: FEE & PAYMENT TRACKER */}
           {activeTab === "fees" && (
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl shadow-md shadow-[#524738]/15">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15">
                 <div>
-                  <h2 className="text-base font-bold text-[#221C16] font-serif">Fee & Payment Tracker</h2>
-                  <p className="text-xs text-[#706C61]">Track legal fee agreements, installments, pending balances, and printable client receipts.</p>
+                  <h2 className="text-base font-bold text-[#0F172A] font-serif">Fee & Payment Tracker</h2>
+                  <p className="text-xs text-[#475569]">Track legal fee agreements, installments, pending balances, and printable client receipts.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCollectPaymentModal(true)}
-                  className="px-4 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg text-xs hover:bg-[#382F25] flex items-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer shrink-0"
+                  className="px-4 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg text-xs hover:bg-[#1E40AF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer shrink-0"
                 >
                   <Plus className="w-4 h-4" /> Collect Payment
                 </button>
@@ -1563,9 +1564,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
               {/* Fee Summary KPIs */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-5 bg-white/90 border border-[#706C61]/25 rounded-2xl shadow-sm">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#706C61]">Total Agreed Fees</span>
-                  <p className="text-2xl font-serif font-bold text-[#221C16] mt-1">
+                <div className="p-5 bg-white/90 border border-[#475569]/25 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#475569]">Total Agreed Fees</span>
+                  <p className="text-2xl font-serif font-bold text-[#0F172A] mt-1">
                     ₹{payments.reduce((sum, p) => sum + (p.totalFee || 0), 0).toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -1584,10 +1585,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               </div>
 
               {/* Payments Table */}
-              <div className="bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#524738]/15">
+              <div className="bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#1D4ED8]/15">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-white/60 border-b border-[#706C61]/25 text-[#221C16] uppercase text-[10px] tracking-wider font-bold">
+                    <thead className="bg-white/60 border-b border-[#475569]/25 text-[#0F172A] uppercase text-[10px] tracking-wider font-bold">
                       <tr>
                         <th scope="col" className="p-3.5">Client / Case</th>
                         <th scope="col" className="p-3.5">Total Fee</th>
@@ -1597,10 +1598,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         <th scope="col" className="p-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#706C61]/15 text-[#221C16]">
+                    <tbody className="divide-y divide-[#475569]/15 text-[#0F172A]">
                       {payments.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-[#706C61]">
+                          <td colSpan={6} className="p-8 text-center text-[#475569]">
                             No fee records yet. Click &ldquo;Collect Payment&rdquo; to log a client payment.
                           </td>
                         </tr>
@@ -1609,7 +1610,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <tr key={p.id} className="hover:bg-white/40 transition-colors">
                             <td className="p-3.5">
                               <span className="font-bold block">{p.clientName}</span>
-                              <span className="text-[10px] text-[#524738] font-mono">{p.caseNumber}</span>
+                              <span className="text-[10px] text-[#1D4ED8] font-mono">{p.caseNumber}</span>
                             </td>
                             <td className="p-3.5 font-semibold">₹{(p.totalFee || 0).toLocaleString("en-IN")}</td>
                             <td className="p-3.5 font-bold text-emerald-700">₹{(p.paidAmount || 0).toLocaleString("en-IN")}</td>
@@ -1629,7 +1630,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               <button
                                 type="button"
                                 onClick={() => setViewingReceipt({ payment: p, historyItem: p.paymentHistory?.[0] })}
-                                className="px-3 py-1 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg hover:bg-[#382F25] inline-flex items-center gap-1 cursor-pointer"
+                                className="px-3 py-1 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg hover:bg-[#1E40AF] inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Receipt className="w-3.5 h-3.5" /> Receipt
                               </button>
@@ -1660,15 +1661,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB 5: LIVE NEWS PORTAL */}
           {activeTab === "news" && (
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl shadow-md shadow-[#524738]/15">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15">
                 <div>
-                  <h2 className="text-base font-bold text-[#221C16] font-serif">Live Website News Portal Manager</h2>
-                  <p className="text-xs text-[#706C61]">Announcements published here are displayed on the public breaking news ticker.</p>
+                  <h2 className="text-base font-bold text-[#0F172A] font-serif">Live Website News Portal Manager</h2>
+                  <p className="text-xs text-[#475569]">Announcements published here are displayed on the public breaking news ticker.</p>
                 </div>
 
                 <button
                   onClick={() => setNewsModalState({ show: true, item: null })}
-                  className="px-4 py-2 bg-[#EFE9DC] text-black font-bold rounded-lg text-xs hover:bg-[#EFE9DC] flex items-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer"
+                  className="px-4 py-2 bg-[#EFF6FF] text-black font-bold rounded-lg text-xs hover:bg-[#EFF6FF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Publish Announcement
@@ -1677,14 +1678,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
               <div className="space-y-3">
                 {news.map((item) => (
-                  <div key={item.id} className="p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl space-y-2 relative group shadow-md shadow-[#524738]/15">
+                  <div key={item.id} className="p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl space-y-2 relative group shadow-md shadow-[#1D4ED8]/15">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#706C61]/15 text-[#221C16]">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#475569]/15 text-[#0F172A]">
                           {item.category}
                         </span>
                         {item.isPinned && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-[#524738]/10 text-[#524738] font-bold flex items-center gap-1 border border-[#524738]/30">
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-[#1D4ED8]/10 text-[#1D4ED8] font-bold flex items-center gap-1 border border-[#1D4ED8]/30">
                             <Pin className="w-3 h-3" /> Pinned
                           </span>
                         )}
@@ -1693,7 +1694,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setNewsModalState({ show: true, item })}
-                          className="p-1 text-[#706C61] hover:text-[#221C16]"
+                          className="p-1 text-[#475569] hover:text-[#0F172A]"
                           title="Edit Notice"
                         >
                           <Edit className="w-4 h-4" />
@@ -1710,9 +1711,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         </button>
                       </div>
                     </div>
-                    <h4 className="text-sm font-bold text-[#221C16]">{item.title}</h4>
-                    <p className="text-xs text-[#524738]">{item.content}</p>
-                    <span className="text-[10px] text-[#706C61]/80 block pt-1">Published: {item.publishedAt}</span>
+                    <h4 className="text-sm font-bold text-[#0F172A]">{item.title}</h4>
+                    <p className="text-xs text-[#1D4ED8]">{item.content}</p>
+                    <span className="text-[10px] text-[#475569]/80 block pt-1">Published: {item.publishedAt}</span>
                   </div>
                 ))}
               </div>
@@ -1722,15 +1723,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB 6: CLIENT DATABASE CRM */}
           {activeTab === "clients" && (
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl shadow-md shadow-[#524738]/15">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-xl shadow-md shadow-[#1D4ED8]/15">
                 <div>
-                  <h2 className="text-base font-bold text-[#221C16] font-serif">Client Database CRM</h2>
-                  <p className="text-xs text-[#706C61]">Manage client contact details, WhatsApp connections, and linked court records.</p>
+                  <h2 className="text-base font-bold text-[#0F172A] font-serif">Client Database CRM</h2>
+                  <p className="text-xs text-[#475569]">Manage client contact details, WhatsApp connections, and linked court records.</p>
                 </div>
 
                 <button
                   onClick={() => setClientModalState({ show: true, client: null, mode: "create" })}
-                  className="px-4 py-2 bg-[#EFE9DC] text-black font-bold rounded-lg text-xs hover:bg-[#EFE9DC] flex items-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer"
+                  className="px-4 py-2 bg-[#EFF6FF] text-black font-bold rounded-lg text-xs hover:bg-[#EFF6FF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Client Profile
@@ -1739,11 +1740,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {clients.map((client) => (
-                  <div key={client.id} className="p-5 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-3 shadow-md shadow-[#524738]/15 hover:border-[#706C61]/35 transition-all">
+                  <div key={client.id} className="p-5 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-3 shadow-md shadow-[#1D4ED8]/15 hover:border-[#475569]/35 transition-all">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-base font-bold text-[#221C16]">{client.name}</h3>
-                        <p className="text-xs text-[#706C61]">{client.mobile}</p>
+                        <h3 className="text-base font-bold text-[#0F172A]">{client.name}</h3>
+                        <p className="text-xs text-[#475569]">{client.mobile}</p>
                       </div>
                       <a
                         href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
@@ -1755,7 +1756,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       </a>
                     </div>
 
-                    <div className="text-xs text-[#524738] space-y-1">
+                    <div className="text-xs text-[#1D4ED8] space-y-1">
                       <p>📍 {client.address}</p>
                       <p>🆔 Aadhaar: {client.aadhaar || "N/A"} | PAN: {client.pan || "N/A"}</p>
                     </div>
@@ -1763,13 +1764,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     <div className="pt-2 border-t border-white/5 flex items-center justify-between">
                       <button
                         onClick={() => setClientModalState({ show: true, client, mode: "view" })}
-                        className="px-3 py-1.5 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg text-xs font-bold text-[#221C16] hover:bg-[#EFE9DC] hover:text-black transition-all cursor-pointer"
+                        className="px-3 py-1.5 bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-lg text-xs font-bold text-[#0F172A] hover:bg-[#EFF6FF] hover:text-black transition-all cursor-pointer"
                       >
                         View Full Profile
                       </button>
                       <button
                         onClick={() => setClientModalState({ show: true, client, mode: "edit" })}
-                        className="p-1.5 text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                        className="p-1.5 text-[#475569] hover:text-[#0F172A] cursor-pointer"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
@@ -1783,9 +1784,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB 8: CAUSE LIST IMPORTER */}
           {activeTab === "causelist" && (
             <div className="space-y-6">
-              <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 shadow-md shadow-[#524738]/15">
-                <h2 className="text-lg font-bold text-[#221C16] font-serif">Daily Court Cause List Importer</h2>
-                <p className="text-xs text-[#706C61]">
+              <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 shadow-md shadow-[#1D4ED8]/15">
+                <h2 className="text-lg font-bold text-[#0F172A] font-serif">Daily Court Cause List Importer</h2>
+                <p className="text-xs text-[#475569]">
                   Paste the daily cause list text or upload cause list PDF to automatically match existing cases and update court hearing dates.
                 </p>
 
@@ -1794,7 +1795,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   value={causeListText}
                   onChange={(e) => setCauseListText(e.target.value)}
                   placeholder="Paste Cause List raw text here... e.g. CIVIL-124/2026 Rameshwar Sharma vs State..."
-                  className="w-full bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl p-4 text-xs font-mono text-[#221C16] outline-none focus:border-[#706C61]/35"
+                  className="w-full bg-[#FFFFFF]/90 border border-[#475569]/25 rounded-xl p-4 text-xs font-mono text-[#0F172A] outline-none focus:border-[#475569]/35"
                 />
 
                 <div className="flex gap-3">
@@ -1804,7 +1805,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       showToast(`Cause List Imported! Matched ${res.matched} case records.`);
                       setCauseListText("");
                     }}
-                    className="px-5 py-2.5 bg-[#EFE9DC] text-black font-bold rounded-xl text-xs hover:bg-[#EFE9DC] shadow-md shadow-[#524738]/15 cursor-pointer"
+                    className="px-5 py-2.5 bg-[#EFF6FF] text-black font-bold rounded-xl text-xs hover:bg-[#EFF6FF] shadow-md shadow-[#1D4ED8]/15 cursor-pointer"
                   >
                     Process & Auto-Match Cause List
                   </button>
@@ -1818,12 +1819,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
           {/* TAB 9: AI CASE ASSISTANT */}
           {activeTab === "ai" && (
-            <div className="p-5 sm:p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 flex flex-col h-[calc(100dvh-11rem)] min-h-[460px] max-h-[680px] shadow-md shadow-[#524738]/15">
-              <div className="flex items-center gap-2 border-b border-[#706C61]/20 pb-3">
-                <Bot className="w-6 h-6 text-[#221C16] shrink-0" aria-hidden="true" />
+            <div className="p-5 sm:p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-4 flex flex-col h-[calc(100dvh-11rem)] min-h-[460px] max-h-[680px] shadow-md shadow-[#1D4ED8]/15">
+              <div className="flex items-center gap-2 border-b border-[#475569]/20 pb-3">
+                <Bot className="w-6 h-6 text-[#0F172A] shrink-0" aria-hidden="true" />
                 <div>
-                  <h2 className="text-base font-bold text-[#221C16] font-serif">Gemini AI Legal Case Assistant</h2>
-                  <p className="text-xs text-[#706C61]">Ask natural language questions about your cases, deadlines, or pending tasks.</p>
+                  <h2 className="text-base font-bold text-[#0F172A] font-serif">Gemini AI Legal Case Assistant</h2>
+                  <p className="text-xs text-[#475569]">Ask natural language questions about your cases, deadlines, or pending tasks.</p>
                 </div>
               </div>
 
@@ -1839,21 +1840,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     type="button"
                     disabled={isAiLoading}
                     onClick={(e) => handleAiChatSubmit(e, prompt)}
-                    className="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white border border-[#706C61]/25 text-[11px] font-semibold text-[#524738] hover:text-[#221C16] transition-colors cursor-pointer disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white border border-[#475569]/25 text-[11px] font-semibold text-[#1D4ED8] hover:text-[#0F172A] transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {prompt}
                   </button>
                 ))}
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-white/40 rounded-xl border border-[#706C61]/15">
+              <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-white/40 rounded-xl border border-[#475569]/15">
                 {aiChatLogs.map((log, idx) => (
                   <div key={idx} className={`flex ${log.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
                       className={`max-w-xl p-3 rounded-xl text-xs whitespace-pre-wrap leading-relaxed ${
                         log.role === "user"
-                          ? "bg-[#524738] text-[#EFE9DC] font-semibold"
-                          : "bg-white/95 border border-[#706C61]/25 text-[#221C16]"
+                          ? "bg-[#1D4ED8] text-[#EFF6FF] font-semibold"
+                          : "bg-white/95 border border-[#475569]/25 text-[#0F172A]"
                       }`}
                     >
                       {log.text}
@@ -1862,7 +1863,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 ))}
                 {isAiLoading && (
                   <div className="flex justify-start">
-                    <div className="p-3 rounded-xl text-xs bg-white/90 border border-[#706C61]/25 text-[#524738] flex items-center gap-2">
+                    <div className="p-3 rounded-xl text-xs bg-white/90 border border-[#475569]/25 text-[#1D4ED8] flex items-center gap-2">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                       <span>Analyzing chamber records...</span>
                     </div>
@@ -1878,12 +1879,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   value={aiQueryText}
                   onChange={(e) => setAiQueryText(e.target.value)}
                   placeholder="e.g., Show all hearings next week..."
-                  className="flex-1 bg-white border border-[#706C61]/25 rounded-xl px-4 py-2.5 text-xs text-[#221C16] outline-none focus:border-[#524738]"
+                  className="flex-1 bg-white border border-[#475569]/25 rounded-xl px-4 py-2.5 text-xs text-[#0F172A] outline-none focus:border-[#1D4ED8]"
                 />
                 <button
                   type="submit"
                   disabled={isAiLoading || !aiQueryText.trim()}
-                  className="px-5 py-2.5 bg-[#524738] text-[#EFE9DC] font-bold rounded-xl text-xs hover:bg-[#382F25] cursor-pointer shadow-md shadow-[#524738]/15 disabled:opacity-50"
+                  className="px-5 py-2.5 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-xl text-xs hover:bg-[#1E40AF] cursor-pointer shadow-md shadow-[#1D4ED8]/15 disabled:opacity-50"
                 >
                   Ask AI
                 </button>
@@ -1894,18 +1895,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {/* TAB 10: SECURITY & AUDIT LOGS */}
           {activeTab === "security" && (
             <div className="space-y-6">
-              <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-6 shadow-md shadow-[#524738]/15">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#706C61]/20 pb-3">
-                  <h2 className="text-lg font-bold text-[#221C16] font-serif">Security Controls & Audit Log Ledger</h2>
+              <div className="p-6 bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] space-y-6 shadow-md shadow-[#1D4ED8]/15">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#475569]/20 pb-3">
+                  <h2 className="text-lg font-bold text-[#0F172A] font-serif">Security Controls & Audit Log Ledger</h2>
                   <span className="text-xs text-emerald-700 font-bold">● AES-256 PIN Encrypted</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* PIN Reset Form */}
-                  <form onSubmit={handlePinUpdateSubmit} className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
-                    <h3 className="font-bold text-[#221C16] text-sm font-serif">Change Admin Security PIN</h3>
+                  <form onSubmit={handlePinUpdateSubmit} className="p-5 bg-white/60 border border-[#475569]/25 rounded-xl space-y-3 text-xs">
+                    <h3 className="font-bold text-[#0F172A] text-sm font-serif">Change Admin Security PIN</h3>
                     <div>
-                      <label htmlFor="old-pin" className="block text-[#524738] mb-1 font-semibold">Current Security PIN</label>
+                      <label htmlFor="old-pin" className="block text-[#1D4ED8] mb-1 font-semibold">Current Security PIN</label>
                       <input
                         id="old-pin"
                         type="password"
@@ -1917,11 +1918,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setPinFormError("");
                         }}
                         placeholder="••••"
-                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#475569]/25 rounded-lg p-2.5 text-[#0F172A] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
                     <div>
-                      <label htmlFor="new-pin" className="block text-[#524738] mb-1 font-semibold">New Security PIN</label>
+                      <label htmlFor="new-pin" className="block text-[#1D4ED8] mb-1 font-semibold">New Security PIN</label>
                       <input
                         id="new-pin"
                         type="password"
@@ -1933,11 +1934,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setPinFormError("");
                         }}
                         placeholder="••••"
-                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#475569]/25 rounded-lg p-2.5 text-[#0F172A] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
                     <div>
-                      <label htmlFor="confirm-pin" className="block text-[#524738] mb-1 font-semibold">Confirm New PIN</label>
+                      <label htmlFor="confirm-pin" className="block text-[#1D4ED8] mb-1 font-semibold">Confirm New PIN</label>
                       <input
                         id="confirm-pin"
                         type="password"
@@ -1949,7 +1950,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           setPinFormError("");
                         }}
                         placeholder="••••"
-                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#475569]/25 rounded-lg p-2.5 text-[#0F172A] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
                     {pinFormError && (
@@ -1957,19 +1958,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         {pinFormError}
                       </p>
                     )}
-                    <button type="submit" className="w-full py-2.5 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg mt-2 shadow-md shadow-[#524738]/15 hover:bg-[#382F25] cursor-pointer">
+                    <button type="submit" className="w-full py-2.5 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg mt-2 shadow-md shadow-[#1D4ED8]/15 hover:bg-[#1E40AF] cursor-pointer">
                       Update Security PIN
                     </button>
                   </form>
 
                   {/* Auto-logout & Backup settings */}
                   <div className="space-y-4">
-                    <div className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
-                      <h3 className="font-bold text-[#221C16] text-sm font-serif">Auto Logout Idle Timeout</h3>
-                      <p className="text-[#524738]">Automatically log out admin session after specified period of inactivity.</p>
+                    <div className="p-5 bg-white/60 border border-[#475569]/25 rounded-xl space-y-3 text-xs">
+                      <h3 className="font-bold text-[#0F172A] text-sm font-serif">Auto Logout Idle Timeout</h3>
+                      <p className="text-[#1D4ED8]">Automatically log out admin session after specified period of inactivity.</p>
 
                       <div>
-                        <label htmlFor="idle-timeout-select" className="block text-[#524738] mb-1 font-semibold">Inactivity Timeout Duration</label>
+                        <label htmlFor="idle-timeout-select" className="block text-[#1D4ED8] mb-1 font-semibold">Inactivity Timeout Duration</label>
                         <select
                           id="idle-timeout-select"
                           value={idleTimeoutMinutes}
@@ -1977,7 +1978,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             setIdleTimeoutMinutes(Number(e.target.value));
                             showToast(`Idle timeout updated to ${e.target.value} minutes.`);
                           }}
-                          className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none font-bold"
+                          className="w-full bg-white border border-[#475569]/25 rounded-lg p-2.5 text-[#0F172A] outline-none font-bold"
                         >
                           <option value={5}>5 Minutes</option>
                           <option value={15}>15 Minutes</option>
@@ -1987,9 +1988,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <div className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
-                      <h3 className="font-bold text-[#221C16] text-sm font-serif">Database Backup & Restore</h3>
-                      <p className="text-[#524738]">Export all cases, clients, payments, and notices to JSON or restore from a previous backup.</p>
+                    <div className="p-5 bg-white/60 border border-[#475569]/25 rounded-xl space-y-3 text-xs">
+                      <h3 className="font-bold text-[#0F172A] text-sm font-serif">Database Backup & Restore</h3>
+                      <p className="text-[#1D4ED8]">Export all cases, clients, payments, and notices to JSON or restore from a previous backup.</p>
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -1997,14 +1998,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             exportBackupJson();
                             showToast("Database backup exported!");
                           }}
-                          className="px-4 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg hover:bg-[#382F25] flex items-center gap-1.5 cursor-pointer"
+                          className="px-4 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg hover:bg-[#1E40AF] flex items-center gap-1.5 cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" /> Export JSON Backup
                         </button>
                         <button
                           type="button"
                           onClick={() => backupInputRef.current?.click()}
-                          className="px-4 py-2 bg-white border border-[#706C61]/30 text-[#221C16] font-bold rounded-lg hover:bg-[#EFE9DC] flex items-center gap-1.5 cursor-pointer"
+                          className="px-4 py-2 bg-white border border-[#475569]/30 text-[#0F172A] font-bold rounded-lg hover:bg-[#EFF6FF] flex items-center gap-1.5 cursor-pointer"
                         >
                           <Upload className="w-3.5 h-3.5" /> Restore JSON
                         </button>
@@ -2022,15 +2023,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 {/* Audit Logs Table */}
                 <div className="space-y-2 pt-2">
-                  <span className="text-xs font-bold text-[#221C16] font-serif">Security Audit Logs Ledger</span>
+                  <span className="text-xs font-bold text-[#0F172A] font-serif">Security Audit Logs Ledger</span>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {auditLogs.map((log) => (
-                      <div key={log.id} className="p-3 bg-white/60 border border-[#706C61]/15 rounded-xl text-xs flex justify-between items-center gap-3">
+                      <div key={log.id} className="p-3 bg-white/60 border border-[#475569]/15 rounded-xl text-xs flex justify-between items-center gap-3">
                         <div className="min-w-0">
-                          <p className="font-bold text-[#221C16]">{log.action}</p>
-                          <p className="text-[#706C61] text-[11px] truncate">{log.details}</p>
+                          <p className="font-bold text-[#0F172A]">{log.action}</p>
+                          <p className="text-[#475569] text-[11px] truncate">{log.details}</p>
                         </div>
-                        <span className="text-[10px] text-[#706C61]/80 shrink-0">{log.timestamp}</span>
+                        <span className="text-[10px] text-[#475569]/80 shrink-0">{log.timestamp}</span>
                       </div>
                     ))}
                   </div>
@@ -2043,6 +2044,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {activeTab === "pdf-manager" && (
             <HearingPdfManagerTab onShowToast={showToast} onNavigateTab={setActiveTab} />
           )}
+
+          {/* Bottom Download Android App Section (visible on web) */}
+          <DownloadAppBanner
+            canInstallPwa={Boolean(deferredInstallPrompt)}
+            onInstallPwa={handleInstallPwa}
+          />
           </SimpleBar>
         </main>
       </div>
@@ -2050,7 +2057,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       {/* MOBILE NATIVE BOTTOM TAB BAR */}
       <nav
         aria-label="Primary mobile navigation"
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-xl border-t border-[#706C61]/20 safe-pb shadow-[0_-6px_24px_rgba(34,28,22,0.08)]"
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-xl border-t border-[#475569]/20 safe-pb shadow-[0_-6px_24px_rgba(15,23,42,0.08)]"
       >
         <div className="grid grid-cols-5 items-center h-16 px-1">
           {[
@@ -2072,13 +2079,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   if (item.id !== "cases") setActiveCase(null);
                 }}
                 className={`flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors cursor-pointer relative ${
-                  isActive ? "text-[#524738]" : "text-[#706C61]"
+                  isActive ? "text-[#1D4ED8]" : "text-[#475569]"
                 }`}
               >
-                <div className={`p-1.5 rounded-xl transition-colors ${isActive ? "bg-[#524738] text-[#EFE9DC]" : ""}`}>
+                <div className={`p-1.5 rounded-xl transition-colors ${isActive ? "bg-[#1D4ED8] text-[#EFF6FF]" : ""}`}>
                   <Icon className="w-4 h-4" aria-hidden="true" />
                 </div>
-                <span className={`text-[10px] leading-none ${isActive ? "font-bold text-[#221C16]" : "font-medium"}`}>
+                <span className={`text-[10px] leading-none ${isActive ? "font-bold text-[#0F172A]" : "font-medium"}`}>
                   {item.label}
                 </span>
               </button>
@@ -2092,14 +2099,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             onClick={() => setShowMobileMoreSheet((prev) => !prev)}
             className={`flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors cursor-pointer ${
               showMobileMoreSheet || ["fees", "pdf-manager", "news", "causelist", "sheets", "ai", "security"].includes(activeTab)
-                ? "text-[#524738]"
-                : "text-[#706C61]"
+                ? "text-[#1D4ED8]"
+                : "text-[#475569]"
             }`}
           >
             <div
               className={`p-1.5 rounded-xl transition-colors ${
                 showMobileMoreSheet || ["fees", "pdf-manager", "news", "causelist", "sheets", "ai", "security"].includes(activeTab)
-                  ? "bg-[#524738] text-[#EFE9DC]"
+                  ? "bg-[#1D4ED8] text-[#EFF6FF]"
                   : ""
               }`}
             >
@@ -2126,19 +2133,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               exit={{ y: "100%" }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full bg-[#EFE9DC] rounded-t-3xl border-t border-[#706C61]/25 p-5 pb-24 safe-pb shadow-2xl space-y-4 max-h-[82dvh] overflow-y-auto"
+              className="w-full bg-[#EFF6FF] rounded-t-3xl border-t border-[#475569]/25 p-5 pb-24 safe-pb shadow-2xl space-y-4 max-h-[82dvh] overflow-y-auto"
             >
-              <div className="w-10 h-1 rounded-full bg-[#706C61]/35 mx-auto" />
+              <div className="w-10 h-1 rounded-full bg-[#475569]/35 mx-auto" />
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-serif font-bold text-[#221C16]">Workspace Tools</h3>
-                  <p className="text-[11px] text-[#706C61]">Advocate Sikandar Khan • Makrana Court</p>
+                  <h3 className="text-base font-serif font-bold text-[#0F172A]">Workspace Tools</h3>
+                  <p className="text-[11px] text-[#475569]">Advocate Sikandar Khan • Makrana Court</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowMobileMoreSheet(false)}
                   aria-label="Close workspace tools"
-                  className="p-2 rounded-full bg-white/80 text-[#524738]"
+                  className="p-2 rounded-full bg-white/80 text-[#1D4ED8]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -2167,8 +2174,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       }}
                       className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center transition-all cursor-pointer ${
                         isActive
-                          ? "bg-[#524738] text-[#EFE9DC] border-[#524738] shadow-md"
-                          : "bg-white/90 text-[#221C16] border-[#706C61]/20 hover:bg-white"
+                          ? "bg-[#1D4ED8] text-[#EFF6FF] border-[#1D4ED8] shadow-md"
+                          : "bg-white/90 text-[#0F172A] border-[#475569]/20 hover:bg-white"
                       }`}
                     >
                       <Icon className="w-5 h-5" aria-hidden="true" />
@@ -2185,7 +2192,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     setShowMobileMoreSheet(false);
                     handleInstallPwa();
                   }}
-                  className="w-full py-3 rounded-2xl bg-[#524738] text-[#EFE9DC] font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-[#1D4ED8] text-[#EFF6FF] font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
                 >
                   <Smartphone className="w-4 h-4" />
                   Install App on Home Screen
@@ -2212,12 +2219,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               exit={{ x: "100%" }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md h-dvh bg-[#EFE9DC] border-l border-[#706C61]/25 shadow-2xl flex flex-col"
+              className="w-full max-w-md h-dvh bg-[#EFF6FF] border-l border-[#475569]/25 shadow-2xl flex flex-col"
             >
-              <div className="p-5 border-b border-[#706C61]/20 flex items-center justify-between bg-white/80">
+              <div className="p-5 border-b border-[#475569]/20 flex items-center justify-between bg-white/80">
                 <div>
-                  <h3 className="text-base font-serif font-bold text-[#221C16]">Hearing Reminders</h3>
-                  <p className="text-[11px] text-[#706C61]">
+                  <h3 className="text-base font-serif font-bold text-[#0F172A]">Hearing Reminders</h3>
+                  <p className="text-[11px] text-[#475569]">
                     {reminders.filter((r) => r.isTriggered).length} active alert(s) • {reminders.length} scheduled
                   </p>
                 </div>
@@ -2225,14 +2232,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   type="button"
                   onClick={() => setShowNotificationsDrawer(false)}
                   aria-label="Close notifications drawer"
-                  className="p-2 rounded-lg text-[#524738] hover:bg-[#706C61]/10 cursor-pointer"
+                  className="p-2 rounded-lg text-[#1D4ED8] hover:bg-[#475569]/10 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {reminders.length === 0 ? (
-                  <p className="text-xs text-[#706C61] text-center py-8">No upcoming hearing reminders.</p>
+                  <p className="text-xs text-[#475569] text-center py-8">No upcoming hearing reminders.</p>
                 ) : (
                   reminders
                     .filter((r) => r.isTriggered)
@@ -2249,16 +2256,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           }
                           setShowNotificationsDrawer(false);
                         }}
-                        className="w-full text-left p-3.5 bg-white/90 hover:bg-white border border-[#706C61]/20 rounded-xl space-y-1 transition-all cursor-pointer shadow-xs"
+                        className="w-full text-left p-3.5 bg-white/90 hover:bg-white border border-[#475569]/20 rounded-xl space-y-1 transition-all cursor-pointer shadow-xs"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#524738]/10 text-[#524738]">
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#1D4ED8]/10 text-[#1D4ED8]">
                             {rem.caseNumber}
                           </span>
-                          <span className="text-[10px] text-[#706C61] font-semibold">{rem.hearingDate}</span>
+                          <span className="text-[10px] text-[#475569] font-semibold">{rem.hearingDate}</span>
                         </div>
-                        <p className="text-xs font-bold text-[#221C16]">{rem.message}</p>
-                        <p className="text-[11px] text-[#524738]">{rem.courtName}</p>
+                        <p className="text-xs font-bold text-[#0F172A]">{rem.message}</p>
+                        <p className="text-[11px] text-[#1D4ED8]">{rem.courtName}</p>
                       </button>
                     ))
                 )}
@@ -2283,15 +2290,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#E2DDD0]/95 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-xl w-full space-y-4 max-h-[90dvh] overflow-y-auto shadow-2xl text-[#221C16]"
+              className="bg-[#FFFFFF]/95 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] p-6 max-w-xl w-full space-y-4 max-h-[90dvh] overflow-y-auto shadow-2xl text-[#0F172A]"
             >
-              <div className="flex items-center justify-between border-b border-[#706C61]/25 pb-3">
-                <h3 id="new-case-modal-title" className="text-base font-bold text-[#221C16] font-serif">Create New Case Record</h3>
+              <div className="flex items-center justify-between border-b border-[#475569]/25 pb-3">
+                <h3 id="new-case-modal-title" className="text-base font-bold text-[#0F172A] font-serif">Create New Case Record</h3>
                 <button
                   type="button"
                   onClick={() => setShowNewCaseModal(false)}
                   aria-label="Close create case modal"
-                  className="text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                  className="text-[#475569] hover:text-[#0F172A] cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -2300,18 +2307,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               <form onSubmit={handleCreateCaseSubmit} className="space-y-3.5 text-xs">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Client Name *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Client Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g., Ramesh Kumar"
                       value={newCaseData.partyName}
                       onChange={(e) => setNewCaseData({ ...newCaseData, partyName: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Client Mobile Number *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Client Mobile Number *</label>
                     <input
                       type="tel"
                       required
@@ -2323,7 +2330,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         setNewCaseData({ ...newCaseData, clientMobile: val });
                         if (val.length === 10) setNewCaseMobileError("");
                       }}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                     {newCaseMobileError && (
                       <p className="text-[10px] text-red-600 font-bold mt-1">{newCaseMobileError}</p>
@@ -2333,22 +2340,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Opponent Name *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Opponent Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g., State of Rajasthan / Suresh Singh"
                       value={newCaseData.opponentName}
                       onChange={(e) => setNewCaseData({ ...newCaseData, opponentName: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Case Type *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Case Type *</label>
                     <select
                       value={newCaseData.caseType}
                       onChange={(e) => setNewCaseData({ ...newCaseData, caseType: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#1D4ED8]"
                     >
                       <option value="Civil">Civil</option>
                       <option value="Criminal">Criminal</option>
@@ -2358,11 +2365,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Appeal / Case Background *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Appeal / Case Background *</label>
                     <select
                       value={newCaseData.caseBackground}
                       onChange={(e) => setNewCaseData({ ...newCaseData, caseBackground: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#1D4ED8]"
                     >
                       <option value="None">None</option>
                       <option value="Appeal">Appeal</option>
@@ -2371,11 +2378,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Court Name *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Court Name *</label>
                     <select
                       value={newCaseData.courtName}
                       onChange={(e) => setNewCaseData({ ...newCaseData, courtName: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#1D4ED8]"
                     >
                       <option value="ACJM Makrana">ACJM Makrana</option>
                       <option value="ADJ Makrana">ADJ Makrana</option>
@@ -2393,36 +2400,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Case Number *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Case Number *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g., CIS/2026/0491"
                       value={newCaseData.caseNumber}
                       onChange={(e) => setNewCaseData({ ...newCaseData, caseNumber: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Act / Law Section *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Act / Law Section *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g., Section 138 NI Act / IPC 302"
                       value={newCaseData.act}
                       onChange={(e) => setNewCaseData({ ...newCaseData, act: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#524738] mb-1 font-bold">Current Stage *</label>
+                    <label className="block text-[#1D4ED8] mb-1 font-bold">Current Stage *</label>
                     <select
                       value={newCaseData.stageOption}
                       onChange={(e) => setNewCaseData({ ...newCaseData, stageOption: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#1D4ED8]"
                     >
                       <option value="Charge">Charge</option>
                       <option value="Appearance of the Accused">Appearance of the Accused</option>
@@ -2439,24 +2446,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                   {newCaseData.stageOption === "Custom" && (
                     <div>
-                      <label className="block text-[#524738] mb-1 font-bold">Specify Custom Stage *</label>
+                      <label className="block text-[#1D4ED8] mb-1 font-bold">Specify Custom Stage *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g., Pre-Framing of Charges"
                         value={newCaseData.customStageInput}
                         onChange={(e) => setNewCaseData({ ...newCaseData, customStageInput: e.target.value })}
-                        className="w-full bg-white border border-[#706C61]/35 rounded-lg p-2.5 text-[#221C16] font-medium outline-none focus:border-[#524738]"
+                        className="w-full bg-white border border-[#475569]/35 rounded-lg p-2.5 text-[#0F172A] font-medium outline-none focus:border-[#1D4ED8]"
                       />
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-[#706C61]/20">
-                  <button type="button" onClick={() => setShowNewCaseModal(false)} className="px-4 py-2 border border-[#706C61]/25 rounded-lg text-[#221C16] font-bold hover:bg-[#E2DDD0]/90">
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#475569]/20">
+                  <button type="button" onClick={() => setShowNewCaseModal(false)} className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-[#FFFFFF]/90">
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg hover:bg-[#382F25] shadow-md shadow-[#524738]/15 cursor-pointer">
+                  <button type="submit" className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg hover:bg-[#1E40AF] shadow-md shadow-[#1D4ED8]/15 cursor-pointer">
                     Create Case File
                   </button>
                 </div>
@@ -2497,17 +2504,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#E2DDD0]/95 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-lg w-full space-y-4 text-[#221C16] shadow-2xl"
+              className="bg-[#FFFFFF]/95 backdrop-blur-xl border border-[#475569]/25 rounded-[24px] p-6 max-w-lg w-full space-y-4 text-[#0F172A] shadow-2xl"
             >
-              <div className="flex items-center justify-between border-b border-[#706C61]/20 pb-3">
-                <h3 id="add-hearing-modal-title" className="text-base font-bold text-[#221C16] font-serif">
+              <div className="flex items-center justify-between border-b border-[#475569]/20 pb-3">
+                <h3 id="add-hearing-modal-title" className="text-base font-bold text-[#0F172A] font-serif">
                   {activeCase ? `Add Hearing Record for ${activeCase.caseNumber}` : "Schedule Court Hearing / Meeting"}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowAddHearingModal(false)}
                   aria-label="Close schedule hearing modal"
-                  className="text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                  className="text-[#475569] hover:text-[#0F172A] cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -2515,13 +2522,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               <form onSubmit={handleAddHearingSubmit} className="space-y-3 text-xs">
                 {!activeCase && (
                   <div>
-                    <label htmlFor="hearing-case-select" className="block text-[#524738] mb-1 font-semibold">Select Case Record *</label>
+                    <label htmlFor="hearing-case-select" className="block text-[#1D4ED8] mb-1 font-semibold">Select Case Record *</label>
                     <select
                       id="hearing-case-select"
                       required
                       value={selectedHearingCaseId || cases[0]?.id || ""}
                       onChange={(e) => setSelectedHearingCaseId(e.target.value)}
-                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#1D4ED8]"
                     >
                       {cases.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -2533,45 +2540,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="hearing-current-date" className="block text-[#524738] mb-1 font-semibold">Hearing Date *</label>
+                    <label htmlFor="hearing-current-date" className="block text-[#1D4ED8] mb-1 font-semibold">Hearing Date *</label>
                     <input
                       id="hearing-current-date"
                       type="date"
                       required
                       value={newHearingData.currentHearingDate}
                       onChange={(e) => setNewHearingData({ ...newHearingData, currentHearingDate: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                   <div>
-                    <label htmlFor="hearing-next-date" className="block text-[#524738] mb-1 font-semibold">Next Hearing Date</label>
+                    <label htmlFor="hearing-next-date" className="block text-[#1D4ED8] mb-1 font-semibold">Next Hearing Date</label>
                     <input
                       id="hearing-next-date"
                       type="date"
                       value={newHearingData.nextHearingDate}
                       onChange={(e) => setNewHearingData({ ...newHearingData, nextHearingDate: e.target.value })}
-                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
+                      className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="hearing-purpose" className="block text-[#524738] mb-1 font-semibold">Purpose of Hearing *</label>
+                  <label htmlFor="hearing-purpose" className="block text-[#1D4ED8] mb-1 font-semibold">Purpose of Hearing *</label>
                   <input
                     id="hearing-purpose"
                     type="text"
                     required
                     value={newHearingData.purpose}
                     onChange={(e) => setNewHearingData({ ...newHearingData, purpose: e.target.value })}
-                    className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
+                    className="w-full bg-white border border-[#475569]/30 rounded-lg p-2.5 text-[#0F172A] outline-none focus:border-[#1D4ED8]"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-[#706C61]/20">
-                  <button type="button" onClick={() => setShowAddHearingModal(false)} className="px-4 py-2 border border-[#706C61]/25 rounded-lg text-[#221C16] font-bold hover:bg-white/60 cursor-pointer">
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#475569]/20">
+                  <button type="button" onClick={() => setShowAddHearingModal(false)} className="px-4 py-2 border border-[#475569]/25 rounded-lg text-[#0F172A] font-bold hover:bg-white/60 cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg cursor-pointer hover:bg-[#382F25]">
+                  <button type="submit" className="px-5 py-2 bg-[#1D4ED8] text-[#EFF6FF] font-bold rounded-lg cursor-pointer hover:bg-[#1E40AF]">
                     Save Hearing
                   </button>
                 </div>

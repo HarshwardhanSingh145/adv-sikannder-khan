@@ -82,7 +82,7 @@ export default function AdvocatePortrait({
       <div className="mt-6 text-center flex flex-col items-center space-y-1.5 max-w-sm px-2">
         {/* Name */}
         <h3
-          className="font-serif text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-bold tracking-wide uppercase bg-gradient-to-r from-gold-light via-[#EFE9DC] to-gold-antique bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(212,175,55,0.3)]"
+          className="font-serif text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-bold tracking-wide uppercase bg-gradient-to-r from-gold-light via-[#EFF6FF] to-gold-antique bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(212,175,55,0.3)]"
           id="advocate-name"
         >
           Advocate Sikandar Khan
