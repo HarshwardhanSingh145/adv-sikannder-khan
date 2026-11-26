@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // News portal collection: public read for visitors, open write for admin functionality
+    match /news/{newsId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Consultation requests: public create for booking form, open read/update for admin
+    match /consultations/{consultationId} {
+      allow create: if true;
+      allow read, update, delete: if true;
+    }
+
+    // Cases collection: accessible for advocate dashboard
+    match /cases/{caseId} {
+      allow read, write: if true;
+    }
+
+    // Clients collection: accessible for advocate client directory
+    match /clients/{clientId} {
+      allow read, write: if true;
+    }
+
+    // Fee payment records: accessible for fee ledger
+    match /payments/{paymentId} {
+      allow read, write: if true;
+    }
+
+    // Audit logs: accessible for security audit tracking
+    match /auditLogs/{logId} {
+      allow read, write: if true;
+    }
+
+    // Default deny for all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
