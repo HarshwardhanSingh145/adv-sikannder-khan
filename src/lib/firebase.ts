@@ -53,8 +53,8 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  // Gracefully fall back to local storage state when Firestore is offline or unauthenticated
+  console.warn(`[Firestore fallback] ${operationType} on ${path}: ${errInfo.error}`);
 }
 
 // Connection test on application initialization

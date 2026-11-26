@@ -31,8 +31,18 @@ import {
 } from "../../lib/todaysHearingPdfGenerator";
 import { motion, AnimatePresence } from "motion/react";
 
-export const HearingPdfManagerTab: React.FC = () => {
-  const { cases, showToast, setActiveCase, setActiveTab } = useAdmin();
+interface HearingPdfManagerTabProps {
+  onShowToast?: (msg: string) => void;
+  onNavigateTab?: (tab: any) => void;
+}
+
+export const HearingPdfManagerTab: React.FC<HearingPdfManagerTabProps> = ({
+  onShowToast,
+  onNavigateTab,
+}) => {
+  const { cases, setActiveCase } = useAdmin();
+  const showToast = onShowToast ?? (() => {});
+  const setActiveTab = onNavigateTab ?? (() => {});
   const [archive, setArchive] = useState<HearingPdfMeta[]>([]);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);

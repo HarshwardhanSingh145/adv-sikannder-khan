@@ -26,11 +26,20 @@ import {
   Star,
   Clock,
   LayoutDashboard,
+  ChevronLeft,
   ChevronRight,
   MessageSquare,
   X,
   FileText,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Loader2,
+  Receipt,
+  LayoutGrid,
+  Smartphone,
 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { App as CapacitorApp } from "@capacitor/app";
 import { useAdmin } from "../../context/AdminContext";
 import { CaseRecord, CaseStage, ClientProfile, NewsItem, FeePaymentRecord } from "../../types/admin";
 import { motion, AnimatePresence } from "motion/react";
@@ -68,13 +77,20 @@ const Toast: React.FC<{ message: string; onClose: () => void }> = ({ message, on
 
   return (
     <motion.div
+      role="status"
+      aria-live="polite"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="fixed top-20 right-6 z-50 bg-[#EFE9DC] text-black px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-[#706C61]/25"
+      className="fixed top-20 right-4 sm:right-6 z-[60] bg-[#524738] text-[#EFE9DC] px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-[#706C61]/40 max-w-[calc(100vw-2rem)]"
     >
       <span>{message}</span>
-      <button onClick={onClose} className="ml-2 text-black/70 hover:text-[#221C16]">
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Dismiss notification"
+        className="ml-2 text-[#EFE9DC]/80 hover:text-white cursor-pointer"
+      >
         ×
       </button>
     </motion.div>
@@ -110,11 +126,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     updateNewsItem,
     deleteNewsItem,
     addPaymentRecord,
+    deletePaymentRecord,
     importCauseList,
     askAiAssistant,
     logout,
-    updateSecurityPin,
+    updatePin,
+    idleTimeoutMinutes,
+    setIdleTimeoutMinutes,
     exportBackupJson,
+    importBackupJson,
   } = useAdmin();
 
   // Active Tab State
@@ -152,8 +172,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     cases: CaseRecord[];
   }>({ show: false, dateStr: "", cases: [] });
 
-  // Notifications Drawer
+  // Notifications Drawer & Mobile App More Sheet
   const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
+  const [showMobileMoreSheet, setShowMobileMoreSheet] = useState(false);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
 
   // Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -182,6 +204,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
   const [causeListText, setCauseListText] = useState("");
   const [aiQueryText, setAiQueryText] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiChatLogs, setAiChatLogs] = useState<Array<{ role: "user" | "ai"; text: string }>>([
     { role: "ai", text: "Greetings Advocate Sikandar Khan. How can I assist you with your case files, hearing schedules, or legal records today?" },
   ]);
@@ -190,9 +213,76 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const [oldPinInput, setOldPinInput] = useState("");
   const [newPinInput, setNewPinInput] = useState("");
   const [confirmPinInput, setConfirmPinInput] = useState("");
-  const [idleTimeoutMinutes, setIdleTimeoutMinutes] = useState(15);
+  const [pinFormError, setPinFormError] = useState("");
 
-  const pdfInputRef = useRef<HTMLInputElement | null>(null);
+  // Dynamic Calendar Month State (defaults to current month)
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+
+  // Case selector for Add Hearing Modal when opened from Analytics
+  const [selectedHearingCaseId, setSelectedHearingCaseId] = useState<string>("");
+
+  const backupInputRef = useRef<HTMLInputElement | null>(null);
+  const aiChatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showNewCaseModal) setShowNewCaseModal(false);
+        else if (showAddHearingModal) setShowAddHearingModal(false);
+        else if (showNotificationsDrawer) setShowNotificationsDrawer(false);
+        else if (showMobileMoreSheet) setShowMobileMoreSheet(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showNewCaseModal, showAddHearingModal, showNotificationsDrawer, showMobileMoreSheet]);
+
+  // Capture PWA Install Prompt
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+  }, []);
+
+  // Native Android hardware back button handling
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let listenerHandle: { remove: () => Promise<void> } | null = null;
+    CapacitorApp.addListener("backButton", () => {
+      if (showMobileMoreSheet) setShowMobileMoreSheet(false);
+      else if (showNotificationsDrawer) setShowNotificationsDrawer(false);
+      else if (showNewCaseModal) setShowNewCaseModal(false);
+      else if (showAddHearingModal) setShowAddHearingModal(false);
+      else if (activeCase) setActiveCase(null);
+      else if (activeTab !== "analytics") setActiveTab("analytics");
+      else CapacitorApp.exitApp();
+    }).then((handle) => {
+      listenerHandle = handle;
+    });
+    return () => {
+      listenerHandle?.remove();
+    };
+  }, [showMobileMoreSheet, showNotificationsDrawer, showNewCaseModal, showAddHearingModal, activeCase, activeTab, setActiveCase]);
+
+  const handleInstallPwa = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    if (result?.outcome === "accepted") {
+      showToast("App installed on your home screen!");
+      setDeferredInstallPrompt(null);
+    }
+  };
+
+  useEffect(() => {
+    aiChatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [aiChatLogs, isAiLoading]);
 
   const todayStr = new Date().toISOString().split("T")[0];
   const todaysHearingsList = React.useMemo(() => getTodaysHearingCases(cases), [cases]);
@@ -322,47 +412,82 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
   const handleAddHearingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeCase) return;
+    const targetCase = activeCase || cases.find((c) => c.id === selectedHearingCaseId) || cases[0];
+    if (!targetCase) {
+      showToast("Please create a case record before scheduling a hearing.");
+      return;
+    }
 
-    addHearingToCase(activeCase.id, {
+    addHearingToCase(targetCase.id, {
       currentHearingDate: newHearingData.currentHearingDate,
       nextHearingDate: newHearingData.nextHearingDate,
       purpose: newHearingData.purpose,
       hearingTime: "11:00 AM",
-      courtRoomNo: activeCase.courtName,
+      courtRoomNumber: targetCase.courtName,
       judgeName: "Hon'ble Presiding Officer",
     });
 
-    showToast("New Hearing Date Added!");
+    showToast(`Hearing scheduled for ${targetCase.caseNumber}!`);
     setShowAddHearingModal(false);
+    setNewHearingData({
+      currentHearingDate: new Date().toISOString().split("T")[0],
+      nextHearingDate: "",
+      purpose: "Evidence Recording",
+    });
   };
 
   const handlePinUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPinInput !== confirmPinInput) {
-      alert("New PIN and Confirm PIN do not match!");
+    setPinFormError("");
+    if (newPinInput.length < 4) {
+      setPinFormError("New PIN must be at least 4 digits.");
       return;
     }
-    if (updateSecurityPin(oldPinInput, newPinInput)) {
+    if (newPinInput !== confirmPinInput) {
+      setPinFormError("New PIN and Confirm PIN do not match.");
+      return;
+    }
+    if (updatePin(oldPinInput, newPinInput)) {
       showToast("Security PIN updated successfully!");
       setOldPinInput("");
       setNewPinInput("");
       setConfirmPinInput("");
     } else {
-      alert("Current PIN incorrect!");
+      setPinFormError("Current Security PIN is incorrect.");
     }
   };
 
-  const handleAiChatSubmit = async (e: React.FormEvent) => {
+  const handleAiChatSubmit = async (e: React.FormEvent, presetQuery?: string) => {
     e.preventDefault();
-    if (!aiQueryText.trim()) return;
+    const q = (presetQuery ?? aiQueryText).trim();
+    if (!q || isAiLoading) return;
 
-    const q = aiQueryText;
-    setAiQueryText("");
+    if (!presetQuery) setAiQueryText("");
     setAiChatLogs((prev) => [...prev, { role: "user", text: q }]);
+    setIsAiLoading(true);
+    try {
+      const response = await askAiAssistant(q);
+      setAiChatLogs((prev) => [...prev, { role: "ai", text: response }]);
+    } catch {
+      setAiChatLogs((prev) => [
+        ...prev,
+        { role: "ai", text: "Unable to process that request right now. Please try again." },
+      ]);
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
-    const response = await askAiAssistant(q);
-    setAiChatLogs((prev) => [...prev, { role: "ai", text: response }]);
+  const handleBackupImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const ok = importBackupJson(String(reader.result || ""));
+      showToast(ok ? "Database restored from JSON backup!" : "Invalid backup JSON file.");
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   // Clock state
@@ -385,37 +510,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const headerRef = useRef<HTMLElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
-    useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      // Header animation
+  useLayoutEffect(() => {
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.from(headerRef.current, {
-        y: -50,
+        y: -30,
         opacity: 0,
-        duration: 0.8,
+        duration: 0.6,
         ease: "power3.out",
       });
 
-      // Sidebar animation
       gsap.from(sidebarRef.current, {
-        x: -50,
+        x: -30,
         opacity: 0,
-        duration: 0.8,
+        duration: 0.6,
         ease: "power3.out",
-        delay: 0.2,
+        delay: 0.1,
       });
 
-      // Main content animation (staggered children)
       gsap.from(".gsap-fade-in", {
-        y: 30,
+        y: 20,
         opacity: 0,
-        duration: 0.3,
-        stagger: 0.01,
+        duration: 0.35,
+        stagger: 0.03,
         ease: "power2.out",
-        delay: 0.3,
+        delay: 0.15,
       });
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   const sendTomorrowReminders = () => {
@@ -451,26 +574,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   };
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50 flex flex-col font-sans overflow-hidden h-screen w-screen">
+    <div ref={containerRef} className="fixed inset-0 z-50 flex flex-col font-sans overflow-hidden h-dvh w-full">
       <PremiumBackground />
       {/* Toast Notification */}
-      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
+      <AnimatePresence>
+        {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
+      </AnimatePresence>
 
       {/* Top Header Bar */}
-      <header ref={headerRef} className="h-20 bg-white/80 backdrop-blur-xl border-b border-[#706C61]/20 px-4 md:px-8 flex items-center justify-between shrink-0 z-20">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <h1 className="text-xl font-light tracking-tight text-[#221C16] flex items-center gap-2 font-serif font-medium">
+      <header ref={headerRef} className="min-h-16 md:h-20 safe-pt bg-white/85 backdrop-blur-xl border-b border-[#706C61]/20 px-4 md:px-8 py-2 md:py-0 flex items-center justify-between shrink-0 z-20 gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden md:flex p-2 text-[#524738] border border-[#706C61]/25 hover:bg-[#706C61]/10 rounded-xl transition-all cursor-pointer bg-white shrink-0"
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-lg sm:text-xl tracking-tight text-[#221C16] flex items-center gap-2 font-serif font-medium truncate">
               Hello Sikander Khan 👋
             </h1>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-sm font-medium text-[#524738]">{getGreeting()}</span>
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-xs sm:text-sm font-medium text-[#524738]">{getGreeting()}</span>
               <span className="text-sm text-[#706C61] hidden sm:inline">Ready to manage today's work?</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-6">
+        <div className="flex items-center gap-2.5 md:gap-5 shrink-0">
           <div className="hidden md:flex flex-col text-right">
             <span className="text-sm font-medium text-[#221C16]">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -483,44 +617,96 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           <div className="w-px h-8 bg-[#706C61]/20 hidden md:block" />
 
           {/* Quick Search Bar */}
-          <div className="relative hidden lg:block w-64">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#706C61]" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim() && activeTab !== "cases") {
+                setActiveTab("cases");
+                setActiveCase(null);
+              }
+            }}
+            className="relative hidden lg:block w-64"
+          >
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#706C61] pointer-events-none" aria-hidden="true" />
             <input
-              type="text"
+              type="search"
+              aria-label="Search cases, clients, or courts"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..."
-              className="w-full bg-white border border-[#706C61]/25 rounded-full pl-9 pr-4 py-2 text-sm text-[#221C16] placeholder-[#706C61]/50 focus:border-[#524738] focus:ring-2 focus:ring-[#524738]/10 transition-all outline-none shadow-sm"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.trim() && activeTab === "analytics") {
+                  setActiveTab("cases");
+                  setActiveCase(null);
+                }
+              }}
+              placeholder="Search cases, clients..."
+              className="w-full bg-white border border-[#706C61]/25 rounded-full pl-9 pr-8 py-2 text-sm text-[#221C16] placeholder-[#706C61]/50 focus:border-[#524738] focus:ring-2 focus:ring-[#524738]/10 transition-all outline-none shadow-sm"
             />
-          </div>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-2.5 text-[#706C61] hover:text-[#221C16] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </form>
+
+          {/* Install Mobile App Button (PWA) */}
+          {deferredInstallPrompt && (
+            <button
+              type="button"
+              onClick={handleInstallPwa}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#524738] text-[#EFE9DC] text-xs font-bold shadow-sm hover:bg-[#382F25] transition-colors cursor-pointer"
+              title="Install Mobile App"
+            >
+              <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
 
           {/* Notifications Bell */}
           <button
-            onClick={() => setShowNotificationsDrawer(!showNotificationsDrawer)}
+            type="button"
+            onClick={() => setShowNotificationsDrawer((prev) => !prev)}
+            aria-label={`Reminders & Notifications (${reminders.filter((r) => r.isTriggered).length} active)`}
+            aria-expanded={showNotificationsDrawer}
             className="p-2.5 text-[#524738] border border-[#706C61]/25 hover:bg-[#706C61]/10 rounded-full relative transition-all cursor-pointer bg-white"
             title="Reminders & Notifications"
           >
-            <Bell className="w-4 h-4" />
-            {reminders.length > 0 && (
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#524738] border-2 border-[#EFE9DC]" />
+            <Bell className="w-4 h-4" aria-hidden="true" />
+            {reminders.filter((r) => r.isTriggered).length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#524738] text-[#EFE9DC] text-[9px] font-bold flex items-center justify-center border-2 border-[#EFE9DC]">
+                {Math.min(reminders.filter((r) => r.isTriggered).length, 99)}
+              </span>
             )}
           </button>
 
           {/* Profile Avatar / Settings */}
-          <div className="w-9 h-9 rounded-full bg-[#524738] flex items-center justify-center text-[#EFE9DC] font-bold text-sm shadow-md shadow-[#524738]/20">
+          <button
+            type="button"
+            onClick={() => setActiveTab("security")}
+            aria-label="Account & Security settings"
+            title="Account & Security Settings"
+            className="w-9 h-9 rounded-full bg-[#524738] hover:bg-[#382F25] flex items-center justify-center text-[#EFE9DC] font-bold text-sm shadow-md shadow-[#524738]/20 cursor-pointer transition-colors"
+          >
             SK
-          </div>
+          </button>
 
           {/* Close Admin Dashboard / Logout */}
           <button
+            type="button"
             onClick={() => {
               logout();
               onClose();
             }}
+            aria-label="Logout"
             className="p-2.5 text-red-600 border border-red-500/30 hover:bg-red-500/10 rounded-full transition-all cursor-pointer bg-white"
             title="Logout"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -528,13 +714,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       {/* Main Workspace Body */}
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">
         {/* Left Sidebar Navigation */}
-        <motion.aside ref={sidebarRef} animate={{ width: isSidebarCollapsed ? 80 : 280 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="bg-white/80 backdrop-blur-2xl border-r border-[#706C61]/20 shrink-0 hidden md:flex m-4 rounded-[24px] shadow-[0_4px_20px_rgba(82,71,56,0.08)] relative overflow-hidden min-h-0">
-          <SimpleBar className="w-full h-full p-4 flex flex-col justify-between">
-            <nav className="space-y-1">
+        <motion.aside ref={sidebarRef} animate={{ width: isSidebarCollapsed ? 80 : 280 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="bg-white/80 backdrop-blur-2xl border-r border-[#706C61]/20 shrink-0 hidden md:flex m-4 rounded-[24px] shadow-[0_4px_20px_rgba(82,71,56,0.08)] relative overflow-hidden min-h-0">
+          <SimpleBar className="w-full h-full p-3.5 flex flex-col justify-between">
+            <nav aria-label="Workspace sections" className="space-y-1">
             {[
               { id: "analytics", label: "Analytics Overview", icon: LayoutDashboard },
               { id: "cases", label: "Case Records & Timeline", icon: Briefcase, count: cases.length },
               { id: "calendar", label: "Hearing Calendar", icon: CalendarIcon },
+              { id: "fees", label: "Fee & Payment Tracker", icon: CreditCard, count: payments.length },
               { id: "news", label: "Live News Portal", icon: Newspaper, count: news.length },
               { id: "clients", label: "Client Database (CRM)", icon: Users, count: clients.length },
               { id: "causelist", label: "Cause List Importer", icon: FileSpreadsheet },
@@ -547,25 +734,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
+                  type="button"
                   key={tab.id}
+                  title={isSidebarCollapsed ? tab.label : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   onClick={() => {
                     setActiveTab(tab.id as any);
                     if (tab.id !== "cases") setActiveCase(null);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center px-2" : "justify-between px-3.5"} py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
                       ? "bg-[#524738] text-[#EFE9DC] font-bold shadow-md shadow-[#524738]/20"
                       : "text-[#524738] hover:bg-[#706C61]/10 hover:text-[#221C16]"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    {!isSidebarCollapsed && <span className="truncate">{tab.label}</span>}
                   </div>
-                  {tab.count !== undefined && (
+                  {!isSidebarCollapsed && tab.count !== undefined && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                        isActive ? "bg-[#706C61]/20 text-[#221C16]" : "bg-[#706C61]/15 text-[#382F25]"
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                        isActive ? "bg-[#EFE9DC]/20 text-[#EFE9DC]" : "bg-[#706C61]/15 text-[#382F25]"
                       }`}
                     >
                       {tab.count}
@@ -576,57 +766,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             })}
           </nav>
 
-            <div className="p-3 bg-white/90 border border-[#706C61]/20 rounded-xl space-y-1 text-[11px] text-[#524738] mt-6">
-              <p className="font-bold text-[#221C16]">Chamber Workstation</p>
-              <p className="text-[#706C61]">Civil & District Court Makrana</p>
-              <p className="text-[10px] text-[#706C61]/70 mt-1">Version 2.4 Encrypted Admin</p>
-            </div>
+            {!isSidebarCollapsed && (
+              <div className="p-3 bg-white/90 border border-[#706C61]/20 rounded-xl space-y-1 text-[11px] text-[#524738] mt-6">
+                <p className="font-bold text-[#221C16]">Chamber Workstation</p>
+                <p className="text-[#706C61]">Civil & District Court Makrana</p>
+                <p className="text-[10px] text-[#706C61]/70 mt-1">Version 2.4 Encrypted Admin</p>
+              </div>
+            )}
           </SimpleBar>
         </motion.aside>
 
         {/* Content Pane */}
         <main className="flex-1 min-h-0 min-w-0 bg-[#E2DDD0]/90">
-          <SimpleBar className="h-full p-4 md:p-6 space-y-6 scroll-smooth">
-          {/* Mobile Horizontal Navigation Tabs */}
-          <div className="flex md:hidden overflow-x-auto gap-2 pb-2 scrollbar-none shrink-0 border-b border-[#706C61]/20">
-            {[
-              { id: "analytics", label: "Analytics", icon: LayoutDashboard },
-              { id: "cases", label: "Cases", icon: Briefcase, count: cases.length },
-              { id: "calendar", label: "Calendar", icon: CalendarIcon },
-              { id: "news", label: "News", icon: Newspaper, count: news.length },
-              { id: "clients", label: "Clients", icon: Users, count: clients.length },
-              { id: "causelist", label: "Cause List", icon: FileSpreadsheet },
-              { id: "pdf-manager", label: "PDF Manager", icon: FileText, count: todaysHearingsList.length },
-              { id: "sheets", label: "Sheets", icon: FileSpreadsheet },
-              { id: "ai", label: "Gemini AI", icon: Bot },
-              { id: "security", label: "Security", icon: ShieldCheck },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as any);
-                    if (tab.id !== "cases") setActiveCase(null);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
-                    isActive
-                      ? "bg-[#524738] text-[#EFE9DC] shadow-sm"
-                      : "bg-white/80 text-[#524738] border border-[#706C61]/20"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                  {tab.count !== undefined && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-black/10">
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <SimpleBar className="h-full p-4 pb-24 md:p-6 md:pb-6 space-y-6 scroll-smooth">
           {/* TAB 1: ANALYTICS OVERVIEW */}
           {activeTab === "analytics" && (
             <div className="space-y-6">
@@ -1085,8 +1237,78 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <CaseNotesAndAttachments caseRecord={activeCase} />
                 </div>
               ) : (
-                /* CASE RECORDS LIST TABLE */
-                <div className="bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#524738]/15">
+                /* CASE RECORDS LIST: MOBILE CARDS + DESKTOP TABLE */
+                <>
+                  {/* Mobile App Card List */}
+                  <div className="md:hidden space-y-3">
+                    {sortedCases.length === 0 ? (
+                      <div className="p-8 text-center bg-white/75 rounded-2xl border border-[#706C61]/20 text-xs text-[#706C61]">
+                        No matching case records found.
+                      </div>
+                    ) : (
+                      sortedCases.map((c) => (
+                        <div
+                          key={c.id}
+                          onClick={() => setActiveCase(c)}
+                          className="p-4 bg-white/90 border border-[#706C61]/25 rounded-2xl shadow-sm active:scale-[0.99] transition-transform space-y-2.5 cursor-pointer"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="font-mono text-[11px] font-bold text-[#524738] block">{c.caseNumber}</span>
+                              <h3 className="text-sm font-bold text-[#221C16] truncate">{c.partyName || c.clientName}</h3>
+                              {c.opponentName && (
+                                <p className="text-[11px] text-[#524738] truncate">vs. {c.opponentName}</p>
+                              )}
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                              c.currentStatus === "Active" ? "bg-emerald-100 border border-emerald-300 text-emerald-900" : "bg-gray-100 border border-gray-300 text-gray-800"
+                            }`}>
+                              {c.currentStatus}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                            <span className={`px-2 py-0.5 rounded font-bold ${
+                              c.caseType.toLowerCase().includes("criminal") ? "bg-rose-100 text-rose-900" : "bg-sky-100 text-sky-900"
+                            }`}>
+                              {c.caseType}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-[#EFE9DC] text-[#221C16] font-semibold">{c.courtName}</span>
+                            <span className="px-2 py-0.5 rounded bg-white border border-[#706C61]/30 text-[#524738] font-bold">{c.currentStage}</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-[#706C61]/15 text-[11px]">
+                            <span className="font-semibold text-[#524738]">
+                              Next: <strong className="text-[#221C16]">{c.hearings[0]?.nextHearingDate || c.hearings[0]?.currentHearingDate || "Pending"}</strong>
+                            </span>
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCaseRecord(c)}
+                                className="px-2.5 py-1 bg-[#EFE9DC] border border-[#706C61]/25 rounded-lg text-[#221C16] font-bold text-[11px]"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={`Delete ${c.caseNumber}`}
+                                onClick={() => {
+                                  if (confirm(`Delete case file for "${c.partyName || c.clientName}" permanently?`)) {
+                                    deleteCase(c.id);
+                                    showToast("Case record deleted.");
+                                  }
+                                }}
+                                className="p-1.5 text-red-600 rounded-lg bg-red-50"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden md:block bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#524738]/15">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
                       <thead className="bg-[#E2DDD0]/90 border-b border-[#706C61]/25 text-[#221C16] uppercase text-[10px] tracking-wider font-bold">
@@ -1167,6 +1389,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     </table>
                   </div>
                 </div>
+                </>
               )}
             </div>
           )}
@@ -1203,37 +1426,232 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#221C16] uppercase border-b border-[#706C61]/20 pb-2">
-                  <span>Sun</span>
-                  <span>Mon</span>
-                  <span>Tue</span>
-                  <span>Wed</span>
-                  <span>Thu</span>
-                  <span>Fri</span>
-                  <span>Sat</span>
+                <div className="flex items-center justify-between flex-wrap gap-2 bg-white/60 border border-[#706C61]/20 rounded-xl px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label="Previous month"
+                      onClick={() =>
+                        setCalendarMonth((prev) =>
+                          prev.month === 0
+                            ? { year: prev.year - 1, month: 11 }
+                            : { year: prev.year, month: prev.month - 1 }
+                        )
+                      }
+                      className="p-1.5 rounded-lg border border-[#706C61]/25 bg-white text-[#221C16] hover:bg-[#EFE9DC] cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-[#221C16] min-w-[150px] text-center">
+                      {new Date(calendarMonth.year, calendarMonth.month, 1).toLocaleDateString("en-IN", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </h3>
+                    <button
+                      type="button"
+                      aria-label="Next month"
+                      onClick={() =>
+                        setCalendarMonth((prev) =>
+                          prev.month === 11
+                            ? { year: prev.year + 1, month: 0 }
+                            : { year: prev.year, month: prev.month + 1 }
+                        )
+                      }
+                      className="p-1.5 rounded-lg border border-[#706C61]/25 bg-white text-[#221C16] hover:bg-[#EFE9DC] cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const now = new Date();
+                      setCalendarMonth({ year: now.getFullYear(), month: now.getMonth() });
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-[#524738] text-[#EFE9DC] text-xs font-bold hover:bg-[#382F25] cursor-pointer"
+                  >
+                    Today
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-2 min-h-[320px]">
-                  {Array.from({ length: 31 }).map((_, i) => {
-                    const dayNum = i + 1;
-                    const dateStr = `2026-08-${dayNum < 10 ? "0" + dayNum : dayNum}`;
-                    const dayCases = casesByDate.get(dateStr) || [];
+                <div className="overflow-x-auto">
+                  <div className="min-w-[540px] space-y-2">
+                    <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#221C16] uppercase border-b border-[#706C61]/20 pb-2">
+                      <span>Sun</span>
+                      <span>Mon</span>
+                      <span>Tue</span>
+                      <span>Wed</span>
+                      <span>Thu</span>
+                      <span>Fri</span>
+                      <span>Sat</span>
+                    </div>
 
-                    return (
-                      <div
-                        key={i}
-                        onClick={() => setCalendarModalState({ show: true, dateStr, cases: dayCases })}
-                        className="p-2 border border-[#706C61]/20 bg-[#E2DDD0]/90 rounded-xl min-h-[75px] space-y-1 hover:border-[#706C61]/35 transition-all cursor-pointer"
-                      >
-                        <span className="text-[10px] font-bold text-[#221C16]">{dayNum}</span>
-                        {dayCases.map((dh) => (
-                          <div key={dh.id} className="p-1 rounded bg-[#524738]/10 border border-[#524738]/30 text-[9px] font-bold text-[#524738] truncate">
-                            🔴 {dh.caseNumber}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
+                    <div className="grid grid-cols-7 gap-2 min-h-[320px]">
+                      {(() => {
+                        const firstWeekday = new Date(calendarMonth.year, calendarMonth.month, 1).getDay();
+                        const daysInMonth = new Date(calendarMonth.year, calendarMonth.month + 1, 0).getDate();
+                        const monthStr = String(calendarMonth.month + 1).padStart(2, "0");
+
+                        return [
+                          ...Array.from({ length: firstWeekday }).map((_, idx) => (
+                            <div key={`empty-${idx}`} className="p-2 rounded-xl bg-[#E2DDD0]/35 border border-transparent min-h-[75px]" />
+                          )),
+                          ...Array.from({ length: daysInMonth }).map((_, i) => {
+                            const dayNum = i + 1;
+                            const dateStr = `${calendarMonth.year}-${monthStr}-${String(dayNum).padStart(2, "0")}`;
+                            const dayCases = casesByDate.get(dateStr) || [];
+                            const isTodayCell = dateStr === todayStr;
+
+                            return (
+                              <button
+                                type="button"
+                                key={dateStr}
+                                onClick={() => setCalendarModalState({ show: true, dateStr, cases: dayCases })}
+                                className={`p-2 text-left border rounded-xl min-h-[78px] space-y-1 transition-all cursor-pointer flex flex-col items-stretch justify-start ${
+                                  isTodayCell
+                                    ? "bg-white border-[#524738] ring-2 ring-[#524738]/20 shadow-sm"
+                                    : "border-[#706C61]/20 bg-[#E2DDD0]/90 hover:border-[#524738]/50 hover:bg-white/70"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className={`text-[11px] font-bold ${isTodayCell ? "text-[#524738]" : "text-[#221C16]"}`}>
+                                    {dayNum}
+                                  </span>
+                                  {isTodayCell && (
+                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#524738] text-[#EFE9DC]">
+                                      Today
+                                    </span>
+                                  )}
+                                </div>
+                                {dayCases.slice(0, 2).map((dh: CaseRecord) => (
+                                  <div key={dh.id} className="p-1 rounded bg-[#524738]/10 border border-[#524738]/30 text-[9px] font-bold text-[#524738] truncate">
+                                    • {dh.caseNumber}
+                                  </div>
+                                ))}
+                                {dayCases.length > 2 && (
+                                  <span className="text-[9px] font-bold text-[#524738]">+{dayCases.length - 2} more</span>
+                                )}
+                              </button>
+                            );
+                          }),
+                        ];
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: FEE & PAYMENT TRACKER */}
+          {activeTab === "fees" && (
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-xl shadow-md shadow-[#524738]/15">
+                <div>
+                  <h2 className="text-base font-bold text-[#221C16] font-serif">Fee & Payment Tracker</h2>
+                  <p className="text-xs text-[#706C61]">Track legal fee agreements, installments, pending balances, and printable client receipts.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCollectPaymentModal(true)}
+                  className="px-4 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg text-xs hover:bg-[#382F25] flex items-center gap-2 shadow-md shadow-[#524738]/15 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" /> Collect Payment
+                </button>
+              </div>
+
+              {/* Fee Summary KPIs */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-5 bg-white/90 border border-[#706C61]/25 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#706C61]">Total Agreed Fees</span>
+                  <p className="text-2xl font-serif font-bold text-[#221C16] mt-1">
+                    ₹{payments.reduce((sum, p) => sum + (p.totalFee || 0), 0).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div className="p-5 bg-emerald-50/90 border border-emerald-200 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Total Collected</span>
+                  <p className="text-2xl font-serif font-bold text-emerald-700 mt-1">
+                    ₹{payments.reduce((sum, p) => sum + (p.paidAmount || 0), 0).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div className="p-5 bg-amber-50/90 border border-amber-200 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Pending Balance</span>
+                  <p className="text-2xl font-serif font-bold text-amber-700 mt-1">
+                    ₹{payments.reduce((sum, p) => sum + Math.max(0, p.pendingAmount || 0), 0).toLocaleString("en-IN")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Payments Table */}
+              <div className="bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] overflow-hidden shadow-md shadow-[#524738]/15">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-white/60 border-b border-[#706C61]/25 text-[#221C16] uppercase text-[10px] tracking-wider font-bold">
+                      <tr>
+                        <th scope="col" className="p-3.5">Client / Case</th>
+                        <th scope="col" className="p-3.5">Total Fee</th>
+                        <th scope="col" className="p-3.5">Paid</th>
+                        <th scope="col" className="p-3.5">Pending</th>
+                        <th scope="col" className="p-3.5">Status</th>
+                        <th scope="col" className="p-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#706C61]/15 text-[#221C16]">
+                      {payments.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-[#706C61]">
+                            No fee records yet. Click &ldquo;Collect Payment&rdquo; to log a client payment.
+                          </td>
+                        </tr>
+                      ) : (
+                        payments.map((p) => (
+                          <tr key={p.id} className="hover:bg-white/40 transition-colors">
+                            <td className="p-3.5">
+                              <span className="font-bold block">{p.clientName}</span>
+                              <span className="text-[10px] text-[#524738] font-mono">{p.caseNumber}</span>
+                            </td>
+                            <td className="p-3.5 font-semibold">₹{(p.totalFee || 0).toLocaleString("en-IN")}</td>
+                            <td className="p-3.5 font-bold text-emerald-700">₹{(p.paidAmount || 0).toLocaleString("en-IN")}</td>
+                            <td className="p-3.5 font-bold text-amber-700">₹{Math.max(0, p.pendingAmount || 0).toLocaleString("en-IN")}</td>
+                            <td className="p-3.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                p.status === "Paid"
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                  : p.status === "Partial"
+                                  ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                  : "bg-rose-100 text-rose-800 border border-rose-300"
+                              }`}>
+                                {p.status}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right space-x-2 whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => setViewingReceipt({ payment: p, historyItem: p.paymentHistory?.[0] })}
+                                className="px-3 py-1 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg hover:bg-[#382F25] inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <Receipt className="w-3.5 h-3.5" /> Receipt
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={`Delete payment record for ${p.clientName}`}
+                                onClick={() => {
+                                  if (confirm(`Delete payment record for ${p.clientName}?`)) {
+                                    deletePaymentRecord(p.id);
+                                    showToast("Payment record deleted.");
+                                  }
+                                }}
+                                className="p-1.5 text-red-600 hover:text-red-700 inline-block align-middle cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -1400,40 +1818,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
           {/* TAB 9: AI CASE ASSISTANT */}
           {activeTab === "ai" && (
-            <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 flex flex-col h-[600px] shadow-md shadow-[#524738]/15">
+            <div className="p-5 sm:p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-4 flex flex-col h-[calc(100dvh-11rem)] min-h-[460px] max-h-[680px] shadow-md shadow-[#524738]/15">
               <div className="flex items-center gap-2 border-b border-[#706C61]/20 pb-3">
-                <Bot className="w-6 h-6 text-[#221C16]" />
+                <Bot className="w-6 h-6 text-[#221C16] shrink-0" aria-hidden="true" />
                 <div>
                   <h2 className="text-base font-bold text-[#221C16] font-serif">Gemini AI Legal Case Assistant</h2>
                   <p className="text-xs text-[#706C61]">Ask natural language questions about your cases, deadlines, or pending tasks.</p>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-[#E2DDD0]/90/60 rounded-xl border border-white/5">
+              {/* Quick Prompt Chips */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Show all hearings next week",
+                  "Which cases have pending documents?",
+                  "Give me an active case overview",
+                ].map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    disabled={isAiLoading}
+                    onClick={(e) => handleAiChatSubmit(e, prompt)}
+                    className="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white border border-[#706C61]/25 text-[11px] font-semibold text-[#524738] hover:text-[#221C16] transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-white/40 rounded-xl border border-[#706C61]/15">
                 {aiChatLogs.map((log, idx) => (
                   <div key={idx} className={`flex ${log.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-xl p-3 rounded-xl text-xs whitespace-pre-wrap ${
+                      className={`max-w-xl p-3 rounded-xl text-xs whitespace-pre-wrap leading-relaxed ${
                         log.role === "user"
-                          ? "bg-[#EFE9DC] text-black font-bold"
-                          : "bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 text-[#221C16]"
+                          ? "bg-[#524738] text-[#EFE9DC] font-semibold"
+                          : "bg-white/95 border border-[#706C61]/25 text-[#221C16]"
                       }`}
                     >
                       {log.text}
                     </div>
                   </div>
                 ))}
+                {isAiLoading && (
+                  <div className="flex justify-start">
+                    <div className="p-3 rounded-xl text-xs bg-white/90 border border-[#706C61]/25 text-[#524738] flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                      <span>Analyzing chamber records...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={aiChatEndRef} />
               </div>
 
               <form onSubmit={handleAiChatSubmit} className="flex gap-2">
                 <input
                   type="text"
+                  aria-label="Ask AI Legal Case Assistant"
                   value={aiQueryText}
                   onChange={(e) => setAiQueryText(e.target.value)}
                   placeholder="e.g., Show all hearings next week..."
-                  className="flex-1 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl px-4 py-2.5 text-xs text-[#221C16] outline-none"
+                  className="flex-1 bg-white border border-[#706C61]/25 rounded-xl px-4 py-2.5 text-xs text-[#221C16] outline-none focus:border-[#524738]"
                 />
-                <button type="submit" className="px-5 py-2.5 bg-[#EFE9DC] text-black font-bold rounded-xl text-xs hover:bg-[#EFE9DC] cursor-pointer shadow-md shadow-[#524738]/15">
+                <button
+                  type="submit"
+                  disabled={isAiLoading || !aiQueryText.trim()}
+                  className="px-5 py-2.5 bg-[#524738] text-[#EFE9DC] font-bold rounded-xl text-xs hover:bg-[#382F25] cursor-pointer shadow-md shadow-[#524738]/15 disabled:opacity-50"
+                >
                   Ask AI
                 </button>
               </form>
@@ -1444,76 +1895,127 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           {activeTab === "security" && (
             <div className="space-y-6">
               <div className="p-6 bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] space-y-6 shadow-md shadow-[#524738]/15">
-                <div className="flex items-center justify-between border-b border-[#706C61]/20 pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#706C61]/20 pb-3">
                   <h2 className="text-lg font-bold text-[#221C16] font-serif">Security Controls & Audit Log Ledger</h2>
                   <span className="text-xs text-emerald-700 font-bold">● AES-256 PIN Encrypted</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* PIN Reset Form */}
-                  <form onSubmit={handlePinUpdateSubmit} className="p-5 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
+                  <form onSubmit={handlePinUpdateSubmit} className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
                     <h3 className="font-bold text-[#221C16] text-sm font-serif">Change Admin Security PIN</h3>
                     <div>
-                      <label className="block text-[#524738] mb-1 font-semibold">Current Security PIN</label>
+                      <label htmlFor="old-pin" className="block text-[#524738] mb-1 font-semibold">Current Security PIN</label>
                       <input
+                        id="old-pin"
                         type="password"
                         required
-                        maxLength={4}
+                        maxLength={6}
                         value={oldPinInput}
-                        onChange={(e) => setOldPinInput(e.target.value)}
+                        onChange={(e) => {
+                          setOldPinInput(e.target.value);
+                          setPinFormError("");
+                        }}
                         placeholder="••••"
-                        className="w-full bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
                     <div>
-                      <label className="block text-[#524738] mb-1 font-semibold">New Security PIN</label>
+                      <label htmlFor="new-pin" className="block text-[#524738] mb-1 font-semibold">New Security PIN</label>
                       <input
+                        id="new-pin"
                         type="password"
                         required
-                        maxLength={4}
+                        maxLength={6}
                         value={newPinInput}
-                        onChange={(e) => setNewPinInput(e.target.value)}
+                        onChange={(e) => {
+                          setNewPinInput(e.target.value);
+                          setPinFormError("");
+                        }}
                         placeholder="••••"
-                        className="w-full bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
                     <div>
-                      <label className="block text-[#524738] mb-1 font-semibold">Confirm New PIN</label>
+                      <label htmlFor="confirm-pin" className="block text-[#524738] mb-1 font-semibold">Confirm New PIN</label>
                       <input
+                        id="confirm-pin"
                         type="password"
                         required
-                        maxLength={4}
+                        maxLength={6}
                         value={confirmPinInput}
-                        onChange={(e) => setConfirmPinInput(e.target.value)}
+                        onChange={(e) => {
+                          setConfirmPinInput(e.target.value);
+                          setPinFormError("");
+                        }}
                         placeholder="••••"
-                        className="w-full bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
+                        className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] font-mono text-center tracking-widest outline-none font-bold"
                       />
                     </div>
-                    <button type="submit" className="w-full py-2 bg-[#EFE9DC] text-black font-bold rounded-lg mt-2 shadow-md shadow-[#524738]/15 hover:bg-[#EFE9DC] cursor-pointer">
+                    {pinFormError && (
+                      <p role="alert" className="text-red-600 font-semibold text-xs">
+                        {pinFormError}
+                      </p>
+                    )}
+                    <button type="submit" className="w-full py-2.5 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg mt-2 shadow-md shadow-[#524738]/15 hover:bg-[#382F25] cursor-pointer">
                       Update Security PIN
                     </button>
                   </form>
 
-                  {/* Auto-logout settings */}
-                  <div className="p-5 bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
-                    <h3 className="font-bold text-[#221C16] text-sm font-serif">Auto Logout Idle Timeout</h3>
-                    <p className="text-[#524738]">Automatically log out admin session after specified period of inactivity.</p>
+                  {/* Auto-logout & Backup settings */}
+                  <div className="space-y-4">
+                    <div className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
+                      <h3 className="font-bold text-[#221C16] text-sm font-serif">Auto Logout Idle Timeout</h3>
+                      <p className="text-[#524738]">Automatically log out admin session after specified period of inactivity.</p>
 
-                    <div>
-                      <label className="block text-[#524738] mb-1 font-semibold">Inactivity Timeout Duration</label>
-                      <select
-                        value={idleTimeoutMinutes}
-                        onChange={(e) => {
-                          setIdleTimeoutMinutes(Number(e.target.value));
-                          showToast(`Idle timeout updated to ${e.target.value} minutes.`);
-                        }}
-                        className="w-full bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none font-bold"
-                      >
-                        <option value={5}>5 Minutes</option>
-                        <option value={15}>15 Minutes</option>
-                        <option value={30}>30 Minutes</option>
-                        <option value={60}>60 Minutes</option>
-                      </select>
+                      <div>
+                        <label htmlFor="idle-timeout-select" className="block text-[#524738] mb-1 font-semibold">Inactivity Timeout Duration</label>
+                        <select
+                          id="idle-timeout-select"
+                          value={idleTimeoutMinutes}
+                          onChange={(e) => {
+                            setIdleTimeoutMinutes(Number(e.target.value));
+                            showToast(`Idle timeout updated to ${e.target.value} minutes.`);
+                          }}
+                          className="w-full bg-white border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none font-bold"
+                        >
+                          <option value={5}>5 Minutes</option>
+                          <option value={15}>15 Minutes</option>
+                          <option value={30}>30 Minutes</option>
+                          <option value={60}>60 Minutes</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-white/60 border border-[#706C61]/25 rounded-xl space-y-3 text-xs">
+                      <h3 className="font-bold text-[#221C16] text-sm font-serif">Database Backup & Restore</h3>
+                      <p className="text-[#524738]">Export all cases, clients, payments, and notices to JSON or restore from a previous backup.</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            exportBackupJson();
+                            showToast("Database backup exported!");
+                          }}
+                          className="px-4 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg hover:bg-[#382F25] flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Download className="w-3.5 h-3.5" /> Export JSON Backup
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => backupInputRef.current?.click()}
+                          className="px-4 py-2 bg-white border border-[#706C61]/30 text-[#221C16] font-bold rounded-lg hover:bg-[#EFE9DC] flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Upload className="w-3.5 h-3.5" /> Restore JSON
+                        </button>
+                        <input
+                          ref={backupInputRef}
+                          type="file"
+                          accept=".json,application/json"
+                          onChange={handleBackupImportFile}
+                          className="hidden"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1523,10 +2025,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <span className="text-xs font-bold text-[#221C16] font-serif">Security Audit Logs Ledger</span>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {auditLogs.map((log) => (
-                      <div key={log.id} className="p-3 bg-[#E2DDD0]/90 border border-white/5 rounded-xl text-xs flex justify-between items-center">
-                        <div>
+                      <div key={log.id} className="p-3 bg-white/60 border border-[#706C61]/15 rounded-xl text-xs flex justify-between items-center gap-3">
+                        <div className="min-w-0">
                           <p className="font-bold text-[#221C16]">{log.action}</p>
-                          <p className="text-[#706C61] text-[11px]">{log.details}</p>
+                          <p className="text-[#706C61] text-[11px] truncate">{log.details}</p>
                         </div>
                         <span className="text-[10px] text-[#706C61]/80 shrink-0">{log.timestamp}</span>
                       </div>
@@ -1538,19 +2040,259 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           )}
 
           {/* HEARING PDF MANAGER TAB */}
-          {activeTab === "pdf-manager" && <HearingPdfManagerTab />}
+          {activeTab === "pdf-manager" && (
+            <HearingPdfManagerTab onShowToast={showToast} onNavigateTab={setActiveTab} />
+          )}
           </SimpleBar>
         </main>
       </div>
 
+      {/* MOBILE NATIVE BOTTOM TAB BAR */}
+      <nav
+        aria-label="Primary mobile navigation"
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-xl border-t border-[#706C61]/20 safe-pb shadow-[0_-6px_24px_rgba(34,28,22,0.08)]"
+      >
+        <div className="grid grid-cols-5 items-center h-16 px-1">
+          {[
+            { id: "analytics", label: "Home", icon: LayoutDashboard },
+            { id: "cases", label: "Cases", icon: Briefcase, badge: cases.length },
+            { id: "calendar", label: "Calendar", icon: CalendarIcon },
+            { id: "clients", label: "Clients", icon: Users },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id && !showMobileMoreSheet;
+            return (
+              <button
+                type="button"
+                key={item.id}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => {
+                  setShowMobileMoreSheet(false);
+                  setActiveTab(item.id as any);
+                  if (item.id !== "cases") setActiveCase(null);
+                }}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors cursor-pointer relative ${
+                  isActive ? "text-[#524738]" : "text-[#706C61]"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl transition-colors ${isActive ? "bg-[#524738] text-[#EFE9DC]" : ""}`}>
+                  <Icon className="w-4 h-4" aria-hidden="true" />
+                </div>
+                <span className={`text-[10px] leading-none ${isActive ? "font-bold text-[#221C16]" : "font-medium"}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            aria-expanded={showMobileMoreSheet}
+            aria-label="More workspace tools"
+            onClick={() => setShowMobileMoreSheet((prev) => !prev)}
+            className={`flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors cursor-pointer ${
+              showMobileMoreSheet || ["fees", "pdf-manager", "news", "causelist", "sheets", "ai", "security"].includes(activeTab)
+                ? "text-[#524738]"
+                : "text-[#706C61]"
+            }`}
+          >
+            <div
+              className={`p-1.5 rounded-xl transition-colors ${
+                showMobileMoreSheet || ["fees", "pdf-manager", "news", "causelist", "sheets", "ai", "security"].includes(activeTab)
+                  ? "bg-[#524738] text-[#EFE9DC]"
+                  : ""
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" aria-hidden="true" />
+            </div>
+            <span className="text-[10px] leading-none font-semibold">More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* MOBILE MORE APPS BOTTOM SHEET */}
+      <AnimatePresence>
+        {showMobileMoreSheet && (
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-black/45 backdrop-blur-xs flex items-end"
+            onClick={() => setShowMobileMoreSheet(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="More Workspace Tools"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full bg-[#EFE9DC] rounded-t-3xl border-t border-[#706C61]/25 p-5 pb-24 safe-pb shadow-2xl space-y-4 max-h-[82dvh] overflow-y-auto"
+            >
+              <div className="w-10 h-1 rounded-full bg-[#706C61]/35 mx-auto" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-serif font-bold text-[#221C16]">Workspace Tools</h3>
+                  <p className="text-[11px] text-[#706C61]">Advocate Sikandar Khan • Makrana Court</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMoreSheet(false)}
+                  aria-label="Close workspace tools"
+                  className="p-2 rounded-full bg-white/80 text-[#524738]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { id: "fees", label: "Fees & Receipts", icon: CreditCard },
+                  { id: "pdf-manager", label: "Hearing PDFs", icon: FileText },
+                  { id: "news", label: "News Portal", icon: Newspaper },
+                  { id: "causelist", label: "Cause List", icon: FileSpreadsheet },
+                  { id: "sheets", label: "Google Sheets", icon: FileSpreadsheet },
+                  { id: "ai", label: "Gemini AI", icon: Bot },
+                  { id: "security", label: "Security & Backup", icon: ShieldCheck },
+                ].map((tool) => {
+                  const Icon = tool.icon;
+                  const isActive = activeTab === tool.id;
+                  return (
+                    <button
+                      type="button"
+                      key={tool.id}
+                      onClick={() => {
+                        setActiveTab(tool.id as any);
+                        setActiveCase(null);
+                        setShowMobileMoreSheet(false);
+                      }}
+                      className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-[#524738] text-[#EFE9DC] border-[#524738] shadow-md"
+                          : "bg-white/90 text-[#221C16] border-[#706C61]/20 hover:bg-white"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" aria-hidden="true" />
+                      <span className="text-[11px] font-bold leading-tight">{tool.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {deferredInstallPrompt && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileMoreSheet(false);
+                    handleInstallPwa();
+                  }}
+                  className="w-full py-3 rounded-2xl bg-[#524738] text-[#EFE9DC] font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  Install App on Home Screen
+                </button>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* NOTIFICATIONS & REMINDERS DRAWER */}
+      <AnimatePresence>
+        {showNotificationsDrawer && (
+          <div
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex justify-end"
+            onClick={() => setShowNotificationsDrawer(false)}
+          >
+            <motion.aside
+              role="dialog"
+              aria-modal="true"
+              aria-label="Hearing Reminders and Notifications"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md h-dvh bg-[#EFE9DC] border-l border-[#706C61]/25 shadow-2xl flex flex-col"
+            >
+              <div className="p-5 border-b border-[#706C61]/20 flex items-center justify-between bg-white/80">
+                <div>
+                  <h3 className="text-base font-serif font-bold text-[#221C16]">Hearing Reminders</h3>
+                  <p className="text-[11px] text-[#706C61]">
+                    {reminders.filter((r) => r.isTriggered).length} active alert(s) • {reminders.length} scheduled
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowNotificationsDrawer(false)}
+                  aria-label="Close notifications drawer"
+                  className="p-2 rounded-lg text-[#524738] hover:bg-[#706C61]/10 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {reminders.length === 0 ? (
+                  <p className="text-xs text-[#706C61] text-center py-8">No upcoming hearing reminders.</p>
+                ) : (
+                  reminders
+                    .filter((r) => r.isTriggered)
+                    .slice(0, 20)
+                    .map((rem) => (
+                      <button
+                        type="button"
+                        key={rem.id}
+                        onClick={() => {
+                          const found = cases.find((c) => c.id === rem.caseId);
+                          if (found) {
+                            setActiveCase(found);
+                            setActiveTab("cases");
+                          }
+                          setShowNotificationsDrawer(false);
+                        }}
+                        className="w-full text-left p-3.5 bg-white/90 hover:bg-white border border-[#706C61]/20 rounded-xl space-y-1 transition-all cursor-pointer shadow-xs"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#524738]/10 text-[#524738]">
+                            {rem.caseNumber}
+                          </span>
+                          <span className="text-[10px] text-[#706C61] font-semibold">{rem.hearingDate}</span>
+                        </div>
+                        <p className="text-xs font-bold text-[#221C16]">{rem.message}</p>
+                        <p className="text-[11px] text-[#524738]">{rem.courtName}</p>
+                      </button>
+                    ))
+                )}
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* NEW CASE MODAL */}
       <AnimatePresence>
         {showNewCaseModal && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-xl w-full space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl text-[#221C16]">
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowNewCaseModal(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="new-case-modal-title"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#E2DDD0]/95 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-xl w-full space-y-4 max-h-[90dvh] overflow-y-auto shadow-2xl text-[#221C16]"
+            >
               <div className="flex items-center justify-between border-b border-[#706C61]/25 pb-3">
-                <h3 className="text-base font-bold text-[#221C16] font-serif">Create New Case Record</h3>
-                <button onClick={() => setShowNewCaseModal(false)} className="text-[#706C61] hover:text-[#221C16]">
+                <h3 id="new-case-modal-title" className="text-base font-bold text-[#221C16] font-serif">Create New Case Record</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCaseModal(false)}
+                  aria-label="Close create case modal"
+                  className="text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1742,49 +2484,94 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
       {/* ADD HEARING MODAL */}
       <AnimatePresence>
-        {showAddHearingModal && activeCase && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-[#E2DDD0]/90 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-lg w-full space-y-4 text-[#221C16]">
-              <h3 className="text-base font-bold text-[#221C16] font-serif">Add Hearing Record for {activeCase.caseNumber}</h3>
+        {showAddHearingModal && (
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowAddHearingModal(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="add-hearing-modal-title"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#E2DDD0]/95 backdrop-blur-xl border border-[#706C61]/25 rounded-[24px] p-6 max-w-lg w-full space-y-4 text-[#221C16] shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-[#706C61]/20 pb-3">
+                <h3 id="add-hearing-modal-title" className="text-base font-bold text-[#221C16] font-serif">
+                  {activeCase ? `Add Hearing Record for ${activeCase.caseNumber}` : "Schedule Court Hearing / Meeting"}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddHearingModal(false)}
+                  aria-label="Close schedule hearing modal"
+                  className="text-[#706C61] hover:text-[#221C16] cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
               <form onSubmit={handleAddHearingSubmit} className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3">
+                {!activeCase && (
                   <div>
-                    <label className="block text-[#524738] mb-1 font-semibold">Hearing Date</label>
+                    <label htmlFor="hearing-case-select" className="block text-[#524738] mb-1 font-semibold">Select Case Record *</label>
+                    <select
+                      id="hearing-case-select"
+                      required
+                      value={selectedHearingCaseId || cases[0]?.id || ""}
+                      onChange={(e) => setSelectedHearingCaseId(e.target.value)}
+                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] font-semibold outline-none focus:border-[#524738]"
+                    >
+                      {cases.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.caseNumber} — {c.caseTitle}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="hearing-current-date" className="block text-[#524738] mb-1 font-semibold">Hearing Date *</label>
                     <input
+                      id="hearing-current-date"
                       type="date"
                       required
                       value={newHearingData.currentHearingDate}
                       onChange={(e) => setNewHearingData({ ...newHearingData, currentHearingDate: e.target.value })}
-                      className="w-full bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none"
+                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[#524738] mb-1 font-semibold">Next Hearing Date</label>
+                    <label htmlFor="hearing-next-date" className="block text-[#524738] mb-1 font-semibold">Next Hearing Date</label>
                     <input
+                      id="hearing-next-date"
                       type="date"
                       value={newHearingData.nextHearingDate}
                       onChange={(e) => setNewHearingData({ ...newHearingData, nextHearingDate: e.target.value })}
-                      className="w-full bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none"
+                      className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[#524738] mb-1 font-semibold">Purpose of Hearing</label>
+                  <label htmlFor="hearing-purpose" className="block text-[#524738] mb-1 font-semibold">Purpose of Hearing *</label>
                   <input
+                    id="hearing-purpose"
                     type="text"
                     required
                     value={newHearingData.purpose}
                     onChange={(e) => setNewHearingData({ ...newHearingData, purpose: e.target.value })}
-                    className="w-full bg-[#E2DDD0]/90 border border-[#706C61]/25 rounded-lg p-2.5 text-[#221C16] outline-none"
+                    className="w-full bg-white border border-[#706C61]/30 rounded-lg p-2.5 text-[#221C16] outline-none focus:border-[#524738]"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <button type="button" onClick={() => setShowAddHearingModal(false)} className="px-4 py-2 border border-[#706C61]/25 rounded-lg text-[#221C16]">
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#706C61]/20">
+                  <button type="button" onClick={() => setShowAddHearingModal(false)} className="px-4 py-2 border border-[#706C61]/25 rounded-lg text-[#221C16] font-bold hover:bg-white/60 cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 bg-[#EFE9DC] text-black font-bold rounded-lg cursor-pointer hover:bg-[#EFE9DC]">
+                  <button type="submit" className="px-5 py-2 bg-[#524738] text-[#EFE9DC] font-bold rounded-lg cursor-pointer hover:bg-[#382F25]">
                     Save Hearing
                   </button>
                 </div>

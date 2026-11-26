@@ -36,6 +36,31 @@ button, a, input, select, textarea {
   touch-action: manipulation;
 }
 
+/* High-contrast keyboard focus indicator */
+:where(a:any-link, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #524738;
+  outline-offset: 2px;
+}
+
+/* Minimum touch target spacing on coarse pointers */
+@media (pointer: coarse) {
+  button, a {
+    min-block-size: 36px;
+  }
+}
+
+/* Mobile app safe-area insets (iOS notch / Android navigation bar) */
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Hardware accelerated utility helpers */
 .gpu-layer {
   transform: translateZ(0);

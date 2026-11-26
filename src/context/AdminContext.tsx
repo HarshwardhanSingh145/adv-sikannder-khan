@@ -478,8 +478,6 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const loginWithPin = (inputPin: string): boolean => {
     // Check lock
     if (lockoutEndTime && Date.now() < lockoutEndTime) {
-      const remainingSecs = Math.ceil((lockoutEndTime - Date.now()) / 1000);
-      alert(`Account locked due to multiple failed attempts. Please wait ${remainingSecs} seconds.`);
       return false;
     }
 
@@ -506,9 +504,6 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const lockUntil = Date.now() + 2 * 60 * 1000; // 2 min lockout
         setLockoutEndTime(lockUntil);
         addAuditLog("SECURITY_ALERT", "Brute-force PIN attempt detected. System locked for 2 minutes.");
-        alert("3 Incorrect PIN attempts! Security lock engaged for 2 minutes.");
-      } else {
-        alert(`Incorrect Security PIN! ${3 - newAttempts} attempt(s) remaining.`);
       }
       return false;
     }
@@ -522,17 +517,14 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updatePin = (oldPin: string, newPin: string): boolean => {
     if (oldPin !== pin) {
-      alert("Current Security PIN is incorrect.");
       return false;
     }
     if (newPin.length < 4) {
-      alert("PIN must be at least 4 digits.");
       return false;
     }
     setPin(newPin);
     saveToLocalStorage(cases, clients, news, payments, auditLogs, newPin);
     addAuditLog("PIN_CHANGED", "Security PIN was updated successfully.");
-    alert("Security PIN updated successfully!");
     return true;
   };
 
@@ -583,17 +575,21 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Cases CRUD
   const addCase = (newCaseData: Omit<CaseRecord, "id" | "createdAt" | "updatedAt" | "hearings" | "documents" | "evidence" | "stickyNotes">) => {
+    const nowId = Date.now();
+    const todayIso = new Date().toISOString().split("T")[0];
     const newCase: CaseRecord = {
       ...newCaseData,
-      id: `case-${Date.now()}`,
+      id: `case-${nowId}`,
+      filingDate: newCaseData.filingDate || todayIso,
+      courtRoomNumber: newCaseData.courtRoomNumber || newCaseData.courtName || "Court Room 1",
       hearings: [
         {
-          id: `h-${Date.now()}`,
-          caseId: `case-${Date.now()}`,
-          currentHearingDate: newCaseData.filingDate,
+          id: `h-${nowId}`,
+          caseId: `case-${nowId}`,
+          currentHearingDate: newCaseData.filingDate || todayIso,
           hearingTime: "10:30 AM",
-          judgeName: "Presiding Judge",
-          courtRoomNumber: newCaseData.courtRoomNumber,
+          judgeName: "Hon'ble Presiding Judge",
+          courtRoomNumber: newCaseData.courtRoomNumber || newCaseData.courtName || "Court Room 1",
           purpose: "Initial Court Appearance & Notice",
           createdAt: new Date().toISOString(),
         },
@@ -602,11 +598,11 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       evidence: [],
       stickyNotes: [
         {
-          id: `sn-init-${Date.now()}`,
-          caseId: `case-${Date.now()}`,
+          id: `sn-init-${nowId}`,
+          caseId: `case-${nowId}`,
           text: "Initial Vakalatnama & Document Verification Pending",
           color: "yellow",
-          createdAt: new Date().toISOString().split("T")[0],
+          createdAt: todayIso,
         },
       ],
       createdAt: new Date().toISOString(),
@@ -638,7 +634,6 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const deleteCase = (caseId: string) => {
-    if (!confirm("Are you sure you want to delete this case and all associated files? This cannot be undone.")) return;
     deleteCaseFromFirestore(caseId).catch((err) => console.warn("Firestore delete case error:", err));
     const updatedCases = cases.filter((c) => c.id !== caseId);
     setCases(updatedCases);
@@ -1156,10 +1151,8 @@ Please check the specific case timeline tab for further document citations.`;
       if (parsed.payments) setPayments(parsed.payments);
       saveToLocalStorage(parsed.cases || cases, parsed.clients || clients, parsed.news || news, parsed.payments || payments, auditLogs, pin);
       addAuditLog("BACKUP_RESTORED", "Database restored from JSON backup file.");
-      alert("Backup restored successfully!");
       return true;
     } catch (e) {
-      alert("Invalid backup JSON file.");
       return false;
     }
   };

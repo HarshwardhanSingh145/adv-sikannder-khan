@@ -8,11 +8,24 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { AdminProvider, useAdmin } from "./context/AdminContext";
 import { AdminAuthScreen } from "./components/admin/AdminAuthScreen";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, MotionConfig } from "motion/react";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { SplashScreen } from "@capacitor/splash-screen";
 import Lenis from "lenis";
 
 export default function App() {
   useEffect(() => {
+    // Configure native mobile status bar & splash screen when running in Capacitor
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: "#524738" }).catch(() => {});
+      SplashScreen.hide().catch(() => {});
+    }
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -34,11 +47,13 @@ export default function App() {
   }, []);
 
   return (
-    <LanguageProvider>
-      <AdminProvider>
-        <MainLayout />
-      </AdminProvider>
-    </LanguageProvider>
+    <MotionConfig reducedMotion="user">
+      <LanguageProvider>
+        <AdminProvider>
+          <MainLayout />
+        </AdminProvider>
+      </LanguageProvider>
+    </MotionConfig>
   );
 }
 
