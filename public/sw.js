@@ -1,5 +1,5 @@
-const CACHE_NAME = "adv-sikandar-workspace-v1";
-const STATIC_ASSETS = ["/", "/index.html", "/manifest.webmanifest"];
+const CACHE_NAME = "adv-sikandar-workspace-v2";
+const STATIC_ASSETS = ["./", "./index.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -30,7 +30,7 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/index.html")))
+      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
   );
 });
 
