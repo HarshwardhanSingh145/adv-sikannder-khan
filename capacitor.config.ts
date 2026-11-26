@@ -6,6 +6,12 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
+    iosScheme: 'capacitor',
+  },
+  ios: {
+    contentInset: 'automatic',
+    allowsLinkPreview: false,
+    preferredContentMode: 'mobile',
   },
   plugins: {
     SplashScreen: {

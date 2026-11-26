@@ -15,7 +15,9 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
     if (completedRef.current) return;
     completedRef.current = true;
     if (Capacitor.isNativePlatform()) {
-      StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+      if (Capacitor.getPlatform() === "android") {
+        StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+      }
       StatusBar.show().catch(() => {});
     }
     onComplete();
@@ -28,7 +30,9 @@ export const SplashIntroVideo: React.FC<SplashIntroVideoProps> = ({ onComplete }
     }
 
     if (Capacitor.isNativePlatform()) {
-      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
+      if (Capacitor.getPlatform() === "android") {
+        StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
+      }
       StatusBar.hide().catch(() => {});
     }
 

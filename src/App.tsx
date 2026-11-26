@@ -16,10 +16,12 @@ import { SplashScreen } from "@capacitor/splash-screen";
 
 export default function App() {
   useEffect(() => {
-    // Configure native mobile status bar & splash screen when running in Capacitor
+    // Configure native mobile status bar & splash screen when running in Capacitor (Android & iOS)
     if (Capacitor.isNativePlatform()) {
       StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-      StatusBar.setBackgroundColor({ color: "#1D4ED8" }).catch(() => {});
+      if (Capacitor.getPlatform() === "android") {
+        StatusBar.setBackgroundColor({ color: "#1D4ED8" }).catch(() => {});
+      }
       SplashScreen.hide().catch(() => {});
     }
   }, []);
@@ -37,8 +39,12 @@ export default function App() {
 
 function MainLayout() {
   const { isLoggedIn } = useAdmin();
-  // Show entry reveal video ONLY inside the native mobile app, not on the webpage
-  const [showIntro, setShowIntro] = useState(() => Capacitor.isNativePlatform());
+  // Show entry reveal video ONLY inside native Android/iOS app or installed iOS Home Screen app, not regular web browsers
+  const [showIntro, setShowIntro] = useState(() => {
+    const isIosStandalone =
+      typeof window !== "undefined" && Boolean((window.navigator as any).standalone);
+    return Capacitor.isNativePlatform() || isIosStandalone;
+  });
 
   return (
     <div
