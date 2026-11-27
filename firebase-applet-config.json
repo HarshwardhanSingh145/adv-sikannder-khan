@@ -1,12 +1,10 @@
 {
-  "projectId": "alien-furnace-zt3g1",
-  "appId": "1:833656490711:web:c1dd1c980485d2f88c3e92",
-  "apiKey": "AIzaSyCcoLtKLTa4uNM3Yc2_udTzhdjn-2gaVg8",
-  "authDomain": "alien-furnace-zt3g1.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-advocatesikandar-67e10602-06b8-4399-a2eb-f0477dcdbda4",
-  "storageBucket": "alien-furnace-zt3g1.firebasestorage.app",
-  "messagingSenderId": "833656490711",
-  "measurementId": "",
-  "oAuthClientId": "833656490711-qf8kfskdvkpu5qfpvdeq3d02b2np06st.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "projectId": "adv-sikandar-workspace-2-de278",
+  "appId": "1:16675368483:web:772b8f4b22fa4812284b96",
+  "apiKey": "AIzaSyDY7XAVxhZjOms4qatgvBtqkPn3OeToEfs",
+  "authDomain": "adv-sikandar-workspace-2-de278.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "adv-sikandar-workspace-2-de278.firebasestorage.app",
+  "messagingSenderId": "16675368483",
+  "measurementId": "G-VF3PDY0PHN"
 }

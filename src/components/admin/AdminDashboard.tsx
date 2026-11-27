@@ -108,6 +108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const {
     cases,
     trashedCases,
+    cloudSyncStatus,
     clients,
     news,
     payments,
@@ -623,6 +624,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
         </div>
 
         <div className="flex items-center gap-2.5 md:gap-5 shrink-0">
+          <span
+            title={
+              cloudSyncStatus === "synced"
+                ? "Connected to Firebase Cloud — changes sync across all devices"
+                : cloudSyncStatus === "connecting"
+                ? "Connecting to Firebase Cloud..."
+                : "Offline / Local-only mode — cloud sync unavailable"
+            }
+            className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+              cloudSyncStatus === "synced"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : cloudSyncStatus === "connecting"
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-red-50 border-red-200 text-red-700"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                cloudSyncStatus === "synced"
+                  ? "bg-emerald-500"
+                  : cloudSyncStatus === "connecting"
+                  ? "bg-amber-500 animate-pulse"
+                  : "bg-red-500"
+              }`}
+            />
+            {cloudSyncStatus === "synced" ? "Cloud Synced" : cloudSyncStatus === "connecting" ? "Syncing..." : "Local Only"}
+          </span>
           <div className="hidden md:flex flex-col text-right">
             <span className="text-sm font-medium text-[#0F172A]">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

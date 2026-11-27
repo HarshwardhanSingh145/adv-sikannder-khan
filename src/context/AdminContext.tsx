@@ -28,6 +28,9 @@ import {
   subscribeCases,
   saveCaseToFirestore,
   deleteCaseFromFirestore,
+  subscribeTrashedCases,
+  saveTrashedCaseToFirestore,
+  deleteTrashedCaseFromFirestore,
   subscribeClients,
   saveClientToFirestore,
   deleteClientFromFirestore,
@@ -92,6 +95,7 @@ interface AdminContextType {
   // Case Management
   cases: CaseRecord[];
   trashedCases: TrashedCaseRecord[];
+  cloudSyncStatus: "connecting" | "synced" | "offline";
   activeCase: CaseRecord | null;
   setActiveCase: (c: CaseRecord | null) => void;
   addCase: (
@@ -243,6 +247,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [trashedCases, setTrashedCases] = useState<TrashedCaseRecord[]>(() => loadTrashedCases());
   const trashedCasesRef = React.useRef<TrashedCaseRecord[]>(trashedCases);
   trashedCasesRef.current = trashedCases;
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<"connecting" | "synced" | "offline">("connecting");
 
   const [activeCase, setActiveCase] = useState<CaseRecord | null>(null);
   const [clients, setClients] = useState<ClientProfile[]>(INITIAL_CLIENTS);
@@ -300,9 +305,18 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     }
 
-    const unsubCases = subscribeCases((fbCases) => {
-      const existing = (fbCases || []).filter((c) => c && !deletedCaseIdsRef.current.has(c.id));
-      setCases(existing);
+    const unsubCases = subscribeCases(
+      (fbCases) => {
+        const existing = (fbCases || []).filter((c) => c && !deletedCaseIdsRef.current.has(c.id));
+        casesRef.current = existing;
+        setCases(existing);
+      },
+      (status) => setCloudSyncStatus(status)
+    );
+    const unsubTrash = subscribeTrashedCases((fbTrash) => {
+      trashedCasesRef.current = fbTrash;
+      setTrashedCases(fbTrash);
+      persistTrashedCases(fbTrash);
     });
     const unsubClients = subscribeClients((fbClients) => {
       if (fbClients && fbClients.length > 0) setClients(fbClients);
@@ -319,6 +333,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     return () => {
       unsubCases();
+      unsubTrash();
       unsubClients();
       unsubNews();
       unsubPayments();
@@ -709,6 +724,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       trashedCasesRef.current = updatedTrash;
       setTrashedCases(updatedTrash);
       persistTrashedCases(updatedTrash);
+      saveTrashedCaseToFirestore(trashedItem).catch((err) => console.warn("Firestore save trashed case error:", err));
     }
 
     deleteCaseFromFirestore(caseId).catch((err) => console.warn("Firestore delete case error:", err));
@@ -744,6 +760,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setCases(updatedCases);
 
     saveCaseToFirestore(caseToRestore).catch((err) => console.warn("Firestore restore case error:", err));
+    deleteTrashedCaseFromFirestore(caseId).catch((err) => console.warn("Firestore delete trashed case error:", err));
     saveToLocalStorage(updatedCases, clients, news, payments, auditLogs, pin);
     addAuditLog("CASE_RESTORED", `Restored case from Recycle Bin: ${caseToRestore.caseNumber}`);
   };
@@ -754,15 +771,20 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     trashedCasesRef.current = updatedTrash;
     setTrashedCases(updatedTrash);
     persistTrashedCases(updatedTrash);
+    deleteTrashedCaseFromFirestore(caseId).catch((err) => console.warn("Firestore permanent delete error:", err));
     addAuditLog("CASE_PERMANENTLY_DELETED", `Permanently deleted case from Recycle Bin: ${trashed?.caseNumber || caseId}`);
   };
 
   const emptyTrash = () => {
-    const count = trashedCasesRef.current.length;
+    const itemsToDelete = [...trashedCasesRef.current];
+    const count = itemsToDelete.length;
     if (count === 0) return;
     trashedCasesRef.current = [];
     setTrashedCases([]);
     persistTrashedCases([]);
+    itemsToDelete.forEach((item) => {
+      deleteTrashedCaseFromFirestore(item.id).catch((err) => console.warn("Firestore empty trash error:", err));
+    });
     addAuditLog("TRASH_EMPTIED", `Emptied Recycle Bin (${count} case file${count === 1 ? "" : "s"} permanently deleted).`);
   };
 
@@ -1303,6 +1325,7 @@ Please check the specific case timeline tab for further document citations.`;
     resetPinWithOtp,
     cases,
     trashedCases,
+    cloudSyncStatus,
     activeCase,
     setActiveCase,
     addCase,
@@ -1352,7 +1375,7 @@ Please check the specific case timeline tab for further document citations.`;
   }), [
     isLoggedIn, pin, idleTimeoutMinutes, failedPinAttempts, lockoutEndTime, session,
     forgotPinMobile, sentOtp, otpExpiryTime, otpVerified,
-    cases, trashedCases, activeCase, clients, news, reminders, payments, auditLogs
+    cases, trashedCases, cloudSyncStatus, activeCase, clients, news, reminders, payments, auditLogs
   ]);
 
   return (

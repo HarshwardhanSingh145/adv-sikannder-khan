@@ -13,7 +13,24 @@ import {
   NewsItem,
   FeePaymentRecord,
   AuditLog,
+  TrashedCaseRecord,
 } from "../types/admin";
+
+function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(stripUndefined) as unknown as T;
+  }
+  if (value && typeof value === "object") {
+    const cleaned: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (v !== undefined) {
+        cleaned[k] = stripUndefined(v);
+      }
+    }
+    return cleaned as T;
+  }
+  return value;
+}
 
 export interface Consultation {
   id: string;
@@ -27,15 +44,23 @@ export interface Consultation {
 }
 
 // 1. CASES
-export function subscribeCases(callback: (cases: CaseRecord[]) => void) {
+export function subscribeCases(
+  callback: (cases: CaseRecord[]) => void,
+  onStatus?: (status: "synced" | "offline") => void
+) {
   const collectionPath = "cases";
   return onSnapshot(
     collection(db, collectionPath),
     (snapshot) => {
-      const items: CaseRecord[] = snapshot.docs.map((d) => d.data() as CaseRecord);
+      const items: CaseRecord[] = snapshot.docs.map((d) => {
+        const data = d.data() as CaseRecord;
+        return { ...data, id: data.id || d.id };
+      });
+      onStatus?.("synced");
       callback(items);
     },
     (error) => {
+      onStatus?.("offline");
       handleFirestoreError(error, OperationType.GET, collectionPath);
     }
   );
@@ -44,7 +69,7 @@ export function subscribeCases(callback: (cases: CaseRecord[]) => void) {
 export async function saveCaseToFirestore(caseRecord: CaseRecord) {
   const path = `cases/${caseRecord.id}`;
   try {
-    await setDoc(doc(db, "cases", caseRecord.id), caseRecord, { merge: true });
+    await setDoc(doc(db, "cases", caseRecord.id), stripUndefined(caseRecord), { merge: true });
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -54,6 +79,44 @@ export async function deleteCaseFromFirestore(caseId: string) {
   const path = `cases/${caseId}`;
   try {
     await deleteDoc(doc(db, "cases", caseId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+}
+
+// 1b. TRASHED CASES (RECYCLE BIN — SYNCED ACROSS ALL DEVICES)
+export function subscribeTrashedCases(callback: (items: TrashedCaseRecord[]) => void) {
+  const collectionPath = "trashedCases";
+  return onSnapshot(
+    collection(db, collectionPath),
+    (snapshot) => {
+      const items: TrashedCaseRecord[] = snapshot.docs
+        .map((d) => {
+          const data = d.data() as TrashedCaseRecord;
+          return { ...data, id: data.id || d.id };
+        })
+        .sort((a, b) => (b.deletedAt || "").localeCompare(a.deletedAt || ""));
+      callback(items);
+    },
+    (error) => {
+      handleFirestoreError(error, OperationType.GET, collectionPath);
+    }
+  );
+}
+
+export async function saveTrashedCaseToFirestore(item: TrashedCaseRecord) {
+  const path = `trashedCases/${item.id}`;
+  try {
+    await setDoc(doc(db, "trashedCases", item.id), stripUndefined(item), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export async function deleteTrashedCaseFromFirestore(caseId: string) {
+  const path = `trashedCases/${caseId}`;
+  try {
+    await deleteDoc(doc(db, "trashedCases", caseId));
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
   }
