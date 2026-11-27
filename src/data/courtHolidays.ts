@@ -131,7 +131,24 @@ export const COURT_HOLIDAY_MAP: Record<string, CourtHoliday> = Object.fromEntrie
 export function getCourtHoliday(dateStr?: string | null): CourtHoliday | null {
   if (!dateStr) return null;
   const key = dateStr.trim();
-  return COURT_HOLIDAY_MAP[key] || null;
+  if (COURT_HOLIDAY_MAP[key]) {
+    return COURT_HOLIDAY_MAP[key];
+  }
+
+  // Block all Sundays as Weekly Court Holidays across every month/year
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key);
+  if (match) {
+    const dt = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    if (!Number.isNaN(dt.getTime()) && dt.getDay() === 0) {
+      return {
+        date: key,
+        name: "Weekly Court Holiday (Sunday)",
+        category: "sunday",
+      };
+    }
+  }
+
+  return null;
 }
 
 export function isCourtHoliday(dateStr?: string | null): boolean {
@@ -139,12 +156,26 @@ export function isCourtHoliday(dateStr?: string | null): boolean {
 }
 
 export function getHolidaysForMonth(year: number, monthIndex: number): CourtHoliday[] {
-  const prefix = `${year}-${String(monthIndex + 1).padStart(2, "0")}-`;
-  return ALL_COURT_HOLIDAYS.filter((h) => h.date.startsWith(prefix));
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const monthStr = String(monthIndex + 1).padStart(2, "0");
+  const result: CourtHoliday[] = [];
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const dateStr = `${year}-${monthStr}-${String(day).padStart(2, "0")}`;
+    const holiday = getCourtHoliday(dateStr);
+    if (holiday) {
+      result.push(holiday);
+    }
+  }
+
+  return result;
 }
 
 export function getHolidayBlockMessage(dateStr?: string | null): string | null {
   const holiday = getCourtHoliday(dateStr);
   if (!holiday) return null;
+  if (holiday.category === "sunday") {
+    return `${formatDateDMY(holiday.date)} is a Sunday (Weekly Court Holiday). Hearing date cannot be scheduled on this day.`;
+  }
   return `${formatDateDMY(holiday.date)} is a Government Holiday (${holiday.name}). Hearing date cannot be scheduled on this day.`;
 }
