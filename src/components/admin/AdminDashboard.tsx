@@ -152,6 +152,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   // Modals state
   const [showNewCaseModal, setShowNewCaseModal] = useState(false);
   const [editingCaseRecord, setEditingCaseRecord] = useState<CaseRecord | null>(null);
+  const [caseToDelete, setCaseToDelete] = useState<CaseRecord | null>(null);
   const [showAddHearingModal, setShowAddHearingModal] = useState(false);
   const [clientModalState, setClientModalState] = useState<{
     show: boolean;
@@ -1130,6 +1131,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <Edit className="w-3.5 h-3.5" /> Edit Record
                         </button>
                         <button
+                          type="button"
+                          onClick={() => setCaseToDelete(activeCase)}
+                          className="px-3 py-2 rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
+                        <button
                           onClick={() => toggleStarCase(activeCase.id)}
                           className={`p-2 rounded-lg border transition-all cursor-pointer ${
                             activeCase.isStarred ? "bg-[#1D4ED8] border-[#1D4ED8] text-[#EFF6FF] font-bold" : "border-[#475569]/25 text-[#475569]"
@@ -1312,13 +1320,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                               <button
                                 type="button"
                                 aria-label={`Delete ${c.caseNumber}`}
-                                onClick={() => {
-                                  if (confirm(`Delete case file for "${c.partyName || c.clientName}" permanently?`)) {
-                                    deleteCase(c.id);
-                                    showToast("Case record deleted.");
-                                  }
-                                }}
-                                className="p-1.5 text-red-600 rounded-lg bg-red-50"
+                                onClick={() => setCaseToDelete(c)}
+                                className="p-1.5 text-red-600 rounded-lg bg-red-50 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1396,12 +1399,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                                 <Edit className="w-3.5 h-3.5" /> Edit
                               </button>
                               <button
-                                onClick={() => {
-                                  if (confirm(`Delete case file for "${c.partyName || c.clientName}" permanently?`)) {
-                                    deleteCase(c.id);
-                                    showToast("Case record deleted.");
-                                  }
-                                }}
+                                type="button"
+                                onClick={() => setCaseToDelete(c)}
                                 className="p-1 text-red-600 hover:text-red-700 inline-block align-middle cursor-pointer"
                                 title="Delete Case"
                               >
@@ -2662,6 +2661,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       </AnimatePresence>
 
       <React.Suspense fallback={null}>
+      {/* DELETE CASE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {caseToDelete && (
+          <div
+            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setCaseToDelete(null)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-case-modal-title"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white border border-red-200 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-[#0F172A]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 id="delete-case-modal-title" className="text-base font-bold text-red-700 font-serif">
+                    Delete Case File Permanently?
+                  </h3>
+                  <p className="text-xs text-[#475569] mt-1">
+                    Case <strong>{caseToDelete.caseNumber}</strong> ({caseToDelete.partyName || caseToDelete.clientName}) will be permanently deleted.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCaseToDelete(null)}
+                  aria-label="Close delete confirmation"
+                  className="text-[#475569] hover:text-[#0F172A] cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#475569]/15">
+                <button
+                  type="button"
+                  onClick={() => setCaseToDelete(null)}
+                  className="px-4 py-2 border border-[#475569]/25 rounded-lg text-xs font-bold text-[#0F172A] hover:bg-[#EFF6FF] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const deletedLabel = caseToDelete.caseNumber || caseToDelete.partyName || caseToDelete.clientName;
+                    deleteCase(caseToDelete.id);
+                    setCaseToDelete(null);
+                    showToast(`Case file "${deletedLabel}" deleted permanently.`);
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold cursor-pointer shadow-sm"
+                >
+                  Delete Case
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* EDIT CASE MODAL */}
       {editingCaseRecord && (
         <EditCaseModal
