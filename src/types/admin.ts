@@ -139,6 +139,10 @@ export interface CaseRecord {
   updatedAt: string;
 }
 
+export interface TrashedCaseRecord extends CaseRecord {
+  deletedAt: string;
+}
+
 export interface ClientProfile {
   id: string;
   name: string;

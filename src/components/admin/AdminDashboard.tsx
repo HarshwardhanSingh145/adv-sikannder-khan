@@ -38,6 +38,7 @@ import {
   LayoutGrid,
   Smartphone,
   Ban,
+  RotateCcw,
 } from "lucide-react";
 import { useAdmin } from "../../context/AdminContext";
 import { CaseRecord, CaseStage, ClientProfile, NewsItem, FeePaymentRecord } from "../../types/admin";
@@ -106,6 +107,7 @@ const AnimatedCounter: React.FC<{ value: number }> = ({ value }) => {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const {
     cases,
+    trashedCases,
     clients,
     news,
     payments,
@@ -116,6 +118,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     addCase,
     updateCase,
     deleteCase,
+    restoreCaseFromTrash,
+    permanentlyDeleteCaseFromTrash,
+    emptyTrash,
     addHearingToCase,
     deleteHearingFromCase,
     togglePinCase,
@@ -153,6 +158,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const [showNewCaseModal, setShowNewCaseModal] = useState(false);
   const [editingCaseRecord, setEditingCaseRecord] = useState<CaseRecord | null>(null);
   const [caseToDelete, setCaseToDelete] = useState<CaseRecord | null>(null);
+  const [showRecycleBinModal, setShowRecycleBinModal] = useState(false);
   const [showAddHearingModal, setShowAddHearingModal] = useState(false);
   const [clientModalState, setClientModalState] = useState<{
     show: boolean;
@@ -1077,13 +1083,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => setShowNewCaseModal(true)}
-                  className="px-4 py-2 bg-[#EFF6FF] text-black font-bold rounded-lg text-xs hover:bg-[#EFF6FF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 shrink-0 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  New Case Record
-                </button>
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setShowRecycleBinModal(true)}
+                    className="px-3.5 py-2 bg-white hover:bg-red-50 border border-[#475569]/30 hover:border-red-300 text-[#0F172A] hover:text-red-700 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                    <span>Recycle Bin</span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-700">
+                      {trashedCases.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setShowNewCaseModal(true)}
+                    className="px-4 py-2 bg-[#EFF6FF] text-black font-bold rounded-lg text-xs hover:bg-[#EFF6FF] flex items-center gap-2 shadow-md shadow-[#1D4ED8]/15 shrink-0 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    New Case Record
+                  </button>
+                </div>
               </div>
 
               {/* Case Cards / Table */}
@@ -2681,10 +2700,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 id="delete-case-modal-title" className="text-base font-bold text-red-700 font-serif">
-                    Delete Case File Permanently?
+                    Move Case File to Recycle Bin?
                   </h3>
                   <p className="text-xs text-[#475569] mt-1">
-                    Case <strong>{caseToDelete.caseNumber}</strong> ({caseToDelete.partyName || caseToDelete.clientName}) will be permanently deleted.
+                    Case <strong>{caseToDelete.caseNumber}</strong> ({caseToDelete.partyName || caseToDelete.clientName}) will be moved to the Recycle Bin. You can restore it anytime.
                   </p>
                 </div>
                 <button
@@ -2710,12 +2729,133 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     const deletedLabel = caseToDelete.caseNumber || caseToDelete.partyName || caseToDelete.clientName;
                     deleteCase(caseToDelete.id);
                     setCaseToDelete(null);
-                    showToast(`Case file "${deletedLabel}" deleted permanently.`);
+                    showToast(`Case "${deletedLabel}" moved to Recycle Bin.`);
                   }}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold cursor-pointer shadow-sm"
                 >
-                  Delete Case
+                  Move to Recycle Bin
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* RECYCLE BIN MODAL */}
+      <AnimatePresence>
+        {showRecycleBinModal && (
+          <div
+            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowRecycleBinModal(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="recycle-bin-modal-title"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#EFF6FF] border border-[#475569]/30 rounded-2xl max-w-2xl w-full max-h-[85dvh] flex flex-col overflow-hidden shadow-2xl text-[#0F172A]"
+            >
+              <div className="p-5 bg-white border-b border-[#475569]/20 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+                    <Trash2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 id="recycle-bin-modal-title" className="text-base font-bold font-serif text-[#0F172A]">
+                      Deleted Cases — Recycle Bin
+                    </h3>
+                    <p className="text-[11px] text-[#475569]">
+                      {trashedCases.length} deleted case file{trashedCases.length === 1 ? "" : "s"} available to restore
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {trashedCases.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        emptyTrash();
+                        showToast("Recycle Bin emptied.");
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold cursor-pointer"
+                    >
+                      Empty Bin
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowRecycleBinModal(false)}
+                    aria-label="Close Recycle Bin"
+                    className="p-1.5 rounded-lg text-[#475569] hover:text-[#0F172A] hover:bg-black/5 cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {trashedCases.length === 0 ? (
+                  <div className="py-12 text-center bg-white/75 rounded-xl border border-dashed border-[#475569]/25 space-y-2">
+                    <Trash2 className="w-8 h-8 text-[#475569]/50 mx-auto" />
+                    <p className="text-sm font-bold text-[#0F172A]">Recycle Bin is empty</p>
+                    <p className="text-xs text-[#475569]">Deleted case files will appear here so you can restore them anytime.</p>
+                  </div>
+                ) : (
+                  trashedCases.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-4 bg-white rounded-xl border border-[#475569]/20 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-mono text-xs font-extrabold text-[#1D4ED8]">{item.caseNumber}</span>
+                          {item.firNumber && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-900">
+                              FIR: {item.firNumber}
+                            </span>
+                          )}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EFF6FF] text-[#0F172A]">
+                            {item.currentStage}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-[#0F172A] truncate">
+                          {item.partyName || item.clientName}
+                          {item.opponentName ? ` vs. ${item.opponentName}` : ""}
+                        </h4>
+                        <p className="text-[11px] text-[#475569]">
+                          {item.courtName} • Deleted: <span className="font-mono font-semibold">{formatDateTimeDMY(item.deletedAt)}</span>
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            restoreCaseFromTrash(item.id);
+                            showToast(`Case "${item.caseNumber}" restored!`);
+                          }}
+                          className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          Restore
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            permanentlyDeleteCaseFromTrash(item.id);
+                            showToast(`Case "${item.caseNumber}" deleted forever.`);
+                          }}
+                          className="px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold cursor-pointer"
+                        >
+                          Delete Forever
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </motion.div>
           </div>

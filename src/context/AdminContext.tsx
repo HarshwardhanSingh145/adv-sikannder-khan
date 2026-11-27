@@ -14,6 +14,7 @@ import {
   HearingRecord,
   CaseNoteItem,
   CaseAttachment,
+  TrashedCaseRecord,
 } from "../types/admin";
 import {
   INITIAL_CASES,
@@ -90,6 +91,7 @@ interface AdminContextType {
 
   // Case Management
   cases: CaseRecord[];
+  trashedCases: TrashedCaseRecord[];
   activeCase: CaseRecord | null;
   setActiveCase: (c: CaseRecord | null) => void;
   addCase: (
@@ -100,6 +102,9 @@ interface AdminContextType {
   ) => void;
   updateCase: (caseId: string, updates: Partial<CaseRecord>) => void;
   deleteCase: (caseId: string) => void;
+  restoreCaseFromTrash: (caseId: string) => void;
+  permanentlyDeleteCaseFromTrash: (caseId: string) => void;
+  emptyTrash: () => void;
   toggleStarCase: (caseId: string) => void;
   togglePinCase: (caseId: string) => void;
   addHearingToCase: (caseId: string, hearing: Omit<HearingRecord, "id" | "caseId" | "createdAt">) => void;
@@ -166,7 +171,29 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = "adv_sikandar_admin_state_v2";
 const DELETED_CASES_KEY = "adv_sikandar_deleted_case_ids_v1";
+const TRASHED_CASES_KEY = "adv_sikandar_trashed_cases_v1";
 const WORKSPACE_INIT_KEY = "adv_sikandar_workspace_initialized_v1";
+
+function loadTrashedCases(): TrashedCaseRecord[] {
+  try {
+    const raw = localStorage.getItem(TRASHED_CASES_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch {
+    // Ignore storage read errors
+  }
+  return [];
+}
+
+function persistTrashedCases(items: TrashedCaseRecord[]) {
+  try {
+    localStorage.setItem(TRASHED_CASES_KEY, JSON.stringify(items));
+  } catch {
+    // Ignore storage write errors
+  }
+}
 
 function loadDeletedCaseIds(): Set<string> {
   try {
@@ -212,6 +239,10 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
   const casesRef = React.useRef<CaseRecord[]>(cases);
   casesRef.current = cases;
+
+  const [trashedCases, setTrashedCases] = useState<TrashedCaseRecord[]>(() => loadTrashedCases());
+  const trashedCasesRef = React.useRef<TrashedCaseRecord[]>(trashedCases);
+  trashedCasesRef.current = trashedCases;
 
   const [activeCase, setActiveCase] = useState<CaseRecord | null>(null);
   const [clients, setClients] = useState<ClientProfile[]>(INITIAL_CLIENTS);
@@ -663,9 +694,22 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const deleteCase = (caseId: string) => {
+    const targetCase = casesRef.current.find((c) => c.id === caseId);
+
     // Track deleted case ID persistently so pre-existing/seeded cases never resurrect on reload or Firestore sync
     deletedCaseIdsRef.current.add(caseId);
     persistDeletedCaseIds(deletedCaseIdsRef.current);
+
+    if (targetCase) {
+      const trashedItem: TrashedCaseRecord = {
+        ...targetCase,
+        deletedAt: new Date().toISOString(),
+      };
+      const updatedTrash = [trashedItem, ...trashedCasesRef.current.filter((t) => t.id !== caseId)];
+      trashedCasesRef.current = updatedTrash;
+      setTrashedCases(updatedTrash);
+      persistTrashedCases(updatedTrash);
+    }
 
     deleteCaseFromFirestore(caseId).catch((err) => console.warn("Firestore delete case error:", err));
     const updatedCases = casesRef.current.filter((c) => c.id !== caseId);
@@ -673,7 +717,53 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setCases(updatedCases);
     if (activeCase?.id === caseId) setActiveCase(null);
     saveToLocalStorage(updatedCases, clients, news, payments, auditLogs, pin);
-    addAuditLog("CASE_DELETED", `Deleted case ID: ${caseId}`);
+    addAuditLog("CASE_DELETED", `Moved case to Recycle Bin: ${targetCase?.caseNumber || caseId}`);
+  };
+
+  const restoreCaseFromTrash = (caseId: string) => {
+    const trashed = trashedCasesRef.current.find((t) => t.id === caseId);
+    if (!trashed) return;
+
+    const { deletedAt: _removed, ...restoredCase } = trashed;
+    const caseToRestore: CaseRecord = {
+      ...restoredCase,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Unblock from deleted IDs so it syncs cleanly with Firestore & reloads
+    deletedCaseIdsRef.current.delete(caseId);
+    persistDeletedCaseIds(deletedCaseIdsRef.current);
+
+    const updatedTrash = trashedCasesRef.current.filter((t) => t.id !== caseId);
+    trashedCasesRef.current = updatedTrash;
+    setTrashedCases(updatedTrash);
+    persistTrashedCases(updatedTrash);
+
+    const updatedCases = [caseToRestore, ...casesRef.current.filter((c) => c.id !== caseId)];
+    casesRef.current = updatedCases;
+    setCases(updatedCases);
+
+    saveCaseToFirestore(caseToRestore).catch((err) => console.warn("Firestore restore case error:", err));
+    saveToLocalStorage(updatedCases, clients, news, payments, auditLogs, pin);
+    addAuditLog("CASE_RESTORED", `Restored case from Recycle Bin: ${caseToRestore.caseNumber}`);
+  };
+
+  const permanentlyDeleteCaseFromTrash = (caseId: string) => {
+    const trashed = trashedCasesRef.current.find((t) => t.id === caseId);
+    const updatedTrash = trashedCasesRef.current.filter((t) => t.id !== caseId);
+    trashedCasesRef.current = updatedTrash;
+    setTrashedCases(updatedTrash);
+    persistTrashedCases(updatedTrash);
+    addAuditLog("CASE_PERMANENTLY_DELETED", `Permanently deleted case from Recycle Bin: ${trashed?.caseNumber || caseId}`);
+  };
+
+  const emptyTrash = () => {
+    const count = trashedCasesRef.current.length;
+    if (count === 0) return;
+    trashedCasesRef.current = [];
+    setTrashedCases([]);
+    persistTrashedCases([]);
+    addAuditLog("TRASH_EMPTIED", `Emptied Recycle Bin (${count} case file${count === 1 ? "" : "s"} permanently deleted).`);
   };
 
   const toggleStarCase = (caseId: string) => {
@@ -1212,11 +1302,15 @@ Please check the specific case timeline tab for further document citations.`;
     verifyForgotPinOtp,
     resetPinWithOtp,
     cases,
+    trashedCases,
     activeCase,
     setActiveCase,
     addCase,
     updateCase,
     deleteCase,
+    restoreCaseFromTrash,
+    permanentlyDeleteCaseFromTrash,
+    emptyTrash,
     toggleStarCase,
     togglePinCase,
     addHearingToCase,
@@ -1258,7 +1352,7 @@ Please check the specific case timeline tab for further document citations.`;
   }), [
     isLoggedIn, pin, idleTimeoutMinutes, failedPinAttempts, lockoutEndTime, session,
     forgotPinMobile, sentOtp, otpExpiryTime, otpVerified,
-    cases, activeCase, clients, news, reminders, payments, auditLogs
+    cases, trashedCases, activeCase, clients, news, reminders, payments, auditLogs
   ]);
 
   return (
