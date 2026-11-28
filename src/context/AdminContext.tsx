@@ -289,27 +289,15 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, []);
 
-  // Seed (first time only) and subscribe to Firestore for real-time synchronization
+  // Subscribe to Firestore as the single source of truth across all devices (never auto-reseed deleted cases)
   useEffect(() => {
-    const alreadyInitialized =
-      localStorage.getItem(WORKSPACE_INIT_KEY) === "true" ||
-      deletedCaseIdsRef.current.size > 0;
-
-    if (!alreadyInitialized) {
-      const seedCases = INITIAL_CASES.filter((c) => !deletedCaseIdsRef.current.has(c.id));
-      seedInitialDataIfEmpty(seedCases, INITIAL_CLIENTS, INITIAL_NEWS, INITIAL_PAYMENTS, INITIAL_AUDIT_LOGS);
-      try {
-        localStorage.setItem(WORKSPACE_INIT_KEY, "true");
-      } catch {
-        // Ignore storage write errors
-      }
-    }
-
     const unsubCases = subscribeCases(
       (fbCases) => {
-        const existing = (fbCases || []).filter((c) => c && !deletedCaseIdsRef.current.has(c.id));
+        const existing = (fbCases || []).filter((c) => Boolean(c && c.id));
         casesRef.current = existing;
         setCases(existing);
+        // Keep local cache in sync with authoritative Firestore snapshot
+        saveToLocalStorage(existing, clients, news, payments, auditLogs, pin);
       },
       (status) => setCloudSyncStatus(status)
     );
@@ -711,13 +699,18 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const deleteCase = (caseId: string) => {
     const targetCase = casesRef.current.find((c) => c.id === caseId);
 
-    // Track deleted case ID persistently so pre-existing/seeded cases never resurrect on reload or Firestore sync
+    // Track deleted case ID locally for offline fallback
     deletedCaseIdsRef.current.add(caseId);
     persistDeletedCaseIds(deletedCaseIdsRef.current);
 
     if (targetCase) {
+      const normalizedPriority =
+        targetCase.priority === "high" || targetCase.priority === "medium" || targetCase.priority === "normal"
+          ? targetCase.priority
+          : "normal";
       const trashedItem: TrashedCaseRecord = {
         ...targetCase,
+        priority: normalizedPriority,
         deletedAt: new Date().toISOString(),
       };
       const updatedTrash = [trashedItem, ...trashedCasesRef.current.filter((t) => t.id !== caseId)];

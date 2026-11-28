@@ -280,7 +280,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({ caseRecord, onSave
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value as CasePriority })}
                 className="w-full bg-[#FFFFFF] border border-[#475569]/35 rounded-xl p-2.5 text-[#0F172A] font-semibold outline-none focus:border-[#0F172A]"
               >
-                <option value="low">Low</option>
+                <option value="normal">Normal</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>

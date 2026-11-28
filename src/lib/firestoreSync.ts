@@ -54,7 +54,8 @@ export function subscribeCases(
     (snapshot) => {
       const items: CaseRecord[] = snapshot.docs.map((d) => {
         const data = d.data() as CaseRecord;
-        return { ...data, id: data.id || d.id };
+        // Always use the authoritative Firestore document ID so deleteDoc/setDoc never target a mismatched ID
+        return { ...data, id: d.id };
       });
       onStatus?.("synced");
       callback(items);
@@ -66,21 +67,25 @@ export function subscribeCases(
   );
 }
 
-export async function saveCaseToFirestore(caseRecord: CaseRecord) {
+export async function saveCaseToFirestore(caseRecord: CaseRecord): Promise<boolean> {
   const path = `cases/${caseRecord.id}`;
   try {
     await setDoc(doc(db, "cases", caseRecord.id), stripUndefined(caseRecord), { merge: true });
+    return true;
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
+    return false;
   }
 }
 
-export async function deleteCaseFromFirestore(caseId: string) {
+export async function deleteCaseFromFirestore(caseId: string): Promise<boolean> {
   const path = `cases/${caseId}`;
   try {
     await deleteDoc(doc(db, "cases", caseId));
+    return true;
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
+    return false;
   }
 }
 
